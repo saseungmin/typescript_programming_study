@@ -9,3 +9,5 @@
 - 예제들을 따라해보며 진행한다.
 
 ### 📚 책 목차
+
+#### [🎈 Chapter 1: 타입스크립트와 개발 환경 만들기](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%201)

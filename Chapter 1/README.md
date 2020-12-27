@@ -1,8 +1,25 @@
-## 🐤 Chapter 1: 타입스크립트와 개발 환경 만들기
+# 🐤 Chapter 1: 타입스크립트와 개발 환경 만들기
 
-### 🦄 타입스크립트란 무엇인가?
+<details><summary>Table of Contents</summary>
 
-#### 🐇 자바스크립트에 타입 기능이 있으면 좋은 이유
+- 🦄 타입스크립트란 무엇인가? [:link:](#-타입스크립트란-무엇인가)
+  - 🐇 자바스크립트에 타입 기능이 있으면 좋은 이유 [:link:](#-자바스크립트에-타입-기능이-있으면-좋은-이유)
+  - 🐇 트랜스파일 [:link:](#-트랜스파일)
+- 🦄 타입스크립트 주요 문법 살펴보기 [:link:](#-타입스크립트-주요-문법-살펴보기)
+  - 🐇 ESNext의 주요 문법 살펴보기 [:link:](#-esnext의-주요-문법-살펴보기)
+  - 🐇 타입스크립트 고유의 문법 살펴보기 [:link:](#-타입스크립트-고유의-문법-살펴보기)
+- 🦄 타입스크립트 개발 환경 만들기 [:link:](#-타입스크립트-개발-환경-만들기)
+  - 🐇 비주얼 스튜디오 코드 설치 [:link:](#-비주얼-스튜디오-코드-설치)
+  - 🐇 Node.js 설치 [:link:](#-nodejs-설치)
+  - 🐇 구글 크롬 브라우저 설치 [:link:](#-구글-크롬-브라우저-설치)
+  - 🐇 타입스크립트 컴파일러 설치 [:link:](#-타입스크립트-컴파일러-설치)
+  - 🐇 타입스크립트 컴파일과 실행 [:link:](#-타입스크립트-컴파일과-실행)
+  - 🐇 ts-node 설치 [:link:](#-ts-node-설치)
+</details>
+
+## 🦄 타입스크립트란 무엇인가?
+
+### 🐇 자바스크립트에 타입 기능이 있으면 좋은 이유
 - 오늘날 소프트웨어는 상당히 복잡하므로 보통 여러 사람이나 팀이 협럭해 하나의 제품을 개발한다.
 - 항상 코드를 작성한 쪽과 사용하는 쪽 사이에 커뮤니케이션이 중요하다.
 - A라는 개발자가 다음과 같은 코드르 만들었다.
@@ -25,17 +42,17 @@ function makePerson(name: string, age: number) {}
 
 - 그리고 **타입스크립트 컴파일러는 문제의 원인이 어디에 있는지 친절하게 알려주므로 코드를 좀 더 수월하게 작성할 수 있다.**
 
-#### 🐇 트랜스파일
+### 🐇 트랜스파일
 - ESNext 자바스크립트 소스코드는 바벨(Babel)이라는 트랜스파일러를 거치면 ES5 자바스크립트 코드로 변환된다.
 - 바벨과 유사하게 타입스크립트 소스코드는 **TSC(TypeScript complier)라는 트랜스파일러**를 통해 ES5 자바스크립트 코드로 변환된다.
 - 트랜스파일러는 텍스트로 된 소스코드를 바이너리 코드를 바꿔주는 컴파일러와 구분하기 위해 생긴 용어이다.
 
-### 🦄 타입스크립트 주요 문법 살펴보기
+## 🦄 타입스크립트 주요 문법 살펴보기
 
 - 타입스크립트를 다루려면 ESNext 문법을 알아야 한다.
 - 타입스크립트에만 고유한 문법도 있다. 두가지 문법을 구분해서 알아보자.
 
-#### 🐇 ESNext의 주요 문법 살펴보기
+### 🐇 ESNext의 주요 문법 살펴보기
 
 1. **비구조화 할당**
 
@@ -152,7 +169,9 @@ get().then(value => console.log(values)); // [1, 2, 3]
 `await`는 `Promise` 객체를 해소(resolve)해 준다. 따라서 `get`함수는 `[1, 2, 3]` 값을 `Promise` 형태로 반환한다.   
 `get`이 반환한 `Promise` 객체는 `then` 메서드를 호출해 실제 값을 얻을 수 있다.   
 
-#### 🐇 타입스크립트 고유의 문법 살펴보기
+> [🔝위로가기](#-chapter-1-타입스크립트와-개발-환경-만들기)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
+### 🐇 타입스크립트 고유의 문법 살펴보기
 
 1. **타입 주석과 타입 추론**
 
@@ -225,18 +244,18 @@ type NumberOrString = number | string;
 type AnimalAndPerson = Animal & Person;
 ```
 
-### 🦄 타입스크립트 개발 환경 만들기
+## 🦄 타입스크립트 개발 환경 만들기
 
-#### 🐇 scoop 프로그램 설치
+### 🐇 scoop 프로그램 설치
 - 타입스크립트 개발 환경은 Node.js 개발 환경과 똑같다.
 - 즉, Node.js를 설치하고 비주얼 스튜디오 코드와 크롬를 설치하면 바로 개발할 수 있다.
 - scoop으로 설치한 프로그램들은 `scoop update *` 명령으로 한꺼번에 가장 최신 버전으로 업데이트된다. (brew와 비슷..?)
 - [scoop 공식 사이트](https://scoop.sh/)
 
-#### 🐇 비주얼 스튜디오 코드 설치
+### 🐇 비주얼 스튜디오 코드 설치
 - [vscode 다운로드](https://code.visualstudio.com/download)
 
-#### 🐇 Node.js 설치
+### 🐇 Node.js 설치
 - [Node.js 다운로드](https://nodejs.org/ko/download/)
 - macOS는 brew를 사용하여 설치가능
 
@@ -245,10 +264,10 @@ type AnimalAndPerson = Animal & Person;
 $ node --version
 ```
 
-#### 🐇 구글 크롬 브라우저 설치
+### 🐇 구글 크롬 브라우저 설치
 - [크롬 다운로드](https://www.google.co.kr/chrome/?brand=CHBD&brand=CHBD&gclid=Cj0KCQiA_qD_BRDiARIsANjZ2LBfTiJbLlGGjPP1pkIe5Fqup0R7Tkpg5FTFdV-Ke3E8Vptm3sh4-GoaAt7LEALw_wcB&gclsrc=aw.ds)
 
-#### 🐇 타입스크립트 컴파일러 설치
+### 🐇 타입스크립트 컴파일러 설치
 - VSCode를 실행하고 터미널에 다음 명령어를 입력해 typescript 패키지를 설치한다.
 
 ```bash
@@ -259,7 +278,7 @@ $ node --version
 - typescript 패키지는 서버와 클라이언트로 동작하는 두 개의 프로그램을 포함하고 있다.
 - 따라서 타입스크립트 컴파일러 이름은 패키지 이름과 달리 `tsc`이다. 즉, 타입스크립트 컴파일러와 클라이언트라는 의미가 동시에 있다.
 
-#### 🐇 타입스크립트 컴파일과 실행
+### 🐇 타입스크립트 컴파일과 실행
 
 ```ts
 // hello.ts
@@ -282,7 +301,7 @@ console.log('Hello world!');
 Hello world!
 ```
 
-#### 🐇 ts-node 설치
+### 🐇 ts-node 설치
 - tsc는 타입스크립트 코드를 ES5 형식의 자바스크립트 코드로 변환만 할 뿐 실행하지는 않는다.
 - 타입스크립트 코드를 ES5로 변환하고 실행까지 동시에 하려면 **ts-node**라는 프로그램을 설치해야 한다.
 
@@ -301,3 +320,5 @@ Hello world!
 > ts-node hello.ts
 Hello world!
 ```
+
+> [🔝위로가기](#-chapter-1-타입스크립트와-개발-환경-만들기)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
