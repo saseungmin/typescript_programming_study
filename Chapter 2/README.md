@@ -431,3 +431,95 @@ console.log(persons);
 > npm run dev
 > npm run build
 ```
+
+## 🦄 tsconfig.json 파일 살펴보기
+- 터미널에서 `tsc --help`를 실행하면 다음과 같은 내용을 볼 수 있다.
+- 이를 통해 `tsc` 컴파일러는 **컴파일 옵션과 대상 파일 목록** 두 가지를 입력받는다는 것을 알 수 있다.
+
+```bash
+> tsc --help
+Version 4.1.3
+Syntax:   tsc [options] [file...] // tsc 명령 형식
+
+Examples: tsc hello.ts
+          tsc --outFile file.js file.ts
+          tsc @args.txt
+          tsc --build tsconfig.json
+
+Options:
+ -h, --help                                         Print this message.
+ -w, --watch                                        Watch input files.
+ ... 생략 ...
+```
+
+- 앞에서 만든 `tsconfig.json` 파일을 보면 다음처럼 구성되어있다.
+
+```json
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "ES5",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "sourceMap": true,
+    "downlevelIteration": true,
+    "noImplicitAny": false,
+    "paths": { "*": ["node_modules/*"] }
+  },
+  "include": ["src/**/*"]
+}
+```
+
+- `compilerOptions` 항목은 `tsc` 명령 형식에서 **옵션**을 나타내고, `includes` 항목은 **대상 파일 목록**을 나타낸다.
+- `include`의 `["src/**/*"]`는 `src` 하위 디렉터리에 있는 모든 파일을 컴파일 대상으로 포함한다는 의미이다.
+
+### 🐇 module 키
+- 타입스크립트 소스코드가 컴파일되어 만들어진 ES5 자바스크립트 코드는 웹 브라우저의 Node.js 양쪽에서 모두 동작해야 한다.
+- 그런데 웹 브라우저와 Node.js는 물리적으로 동작하는 방식이 달라서 여러 개의 파일로 분할된 자바스크립트 코드 또한 웹 브라우저와 Node.js 양쪽에서 각각 다르게 동작한다.
+- 자바스크립트 모듈은 웹 브라우저에서는 **AMD**(**asynchronous module definition**) 방식으로 동작하고, Node.js처럼 웹 브라우저가 아닌 환경에서는 **CommonJS** 방식으로 동작한다.
+- `tsconfig.json` 파일에서 `compilerOptions` 항목의 `module` 키는 동작 대상 플랫폼이 웹 브라우저인지 Node.js인지를 구분해 그에 맞는 모듈 방식으로 컴파일하려는 목적으로 설정한다.
+
+```json
+{
+  "compilerOptions": {
+    "module": "commonjs", // Node.js
+    "module": "amd", // 웹 브라우저
+  },
+}
+```
+### 🐇 moduleResolution 키
+- `module`키의 값이 `commonjs`이면 Node.js에서 동작하는 것을 의미하므로, **`moduleResolution`키값은 항상 `node`로 설정**한다.
+- 반면에 `module`키값이 `amd`이면 **`moduleResolution`키값은 `classic`으로 설정**한다.
+
+### 🐇 target 키
+- `target` 키에는 **트랜스파일할 대상 자바스크립트 버전을 설정**한다.
+- 대부분 es5를 키값으로 설정한다.
+
+### 🐇 baseUrl과 outDir 키
+- `baseUrl`과 `outDir` 키에는 **트랜스파일된 ES5 자바스크립트 파일을 저장하는 디렉터리를 설정한다.**
+- `tsc`는 `tsconfig.json` 파일이 있는 디렉터리에서 실행된다. 따라서 현재 디렉터리를 의미하는 `"."`로 `baseUrl` 키값으로 설정하는 것이 보통이다.
+- `outDir`키는 **하위 디렉터리의 이름**이다.
+
+### 🐇 paths 키
+- `paths` 키에는 **소스 파일의 `import`문에서 `form` 부분을 해석할 때 찾아야 하는 디렉터리를 설정한다.**
+- `import` 문에 찾아야 하는 소스가 외부 패키지이면 `node_modules` 디렉터리에서 찾아야 하므로 키값에 `node_modules/*`도 포함한다.
+
+### 🐇 esModuleInterop 키
+- 오픈소스 자바스크립트 라이브로리 중에는 웹 브라우저에서 동작한다는 가정으로 만들어진 것이 있는데, 이들은 `CommonJS` 방식으로 동작하는 타입스크립트 코드에 혼란을 줄 수 있다.
+- `chance`가 바로 AMD방식을 전제로 해서 구현된 라이브러리이다. 따라서 `chance` 패키지가 동작하려면 `esModuleInterop` 키값을 반드시 `true`로 설정해야 한다.
+
+### 🐇 sourceMap 키
+- `sourceMap` 키 값이 `true`이면 트랜스파일 티렉터리에는 `.js` 파일 이외에도 `.js.map` 파일이 만들어진다.
+- 이 소스맵 파일은 **변환된 자바스크립트 코드가 타입스크립트 코드의 어디에 해당하는지를 알려준다.**
+- 소스맵 파일은 주로 디버깅할 때 사용된다.
+
+### 🐇 downlevelIteration 키
+- 생성기(generator)라는 타입스크립트 구문이 있는데, 이 구문이 정성적으로 동작하려면 `downlevelIteration` 키값을 반드시 `true`로 설정해야 한다.
+
+### 🐇 noImplicitAny 키
+- 타입스크립트 컴파일러는 기본적으로 `f(a, b)` 처럼 매개변수에 `a, b`에 타입을 명시하지 않은 코드일 경우 `f(a: any, b: any)`처럼 암시적으로 `any`타입으로 설정한 것으로 간주한다.
+- 이런 형태의 코드는 타입스크립트 언어의 장점을 가진 것이 아니므로 코드에 문제가 있음을 알려준다.
+- 하지만 처음 배우는 사람의 입장에서는 오류 메시지의 의미가 직관적이지 않아 혼란을 준다.
+- 이 책에서는 `noImplicitAny`키 값을 `false`로 설정했다.
