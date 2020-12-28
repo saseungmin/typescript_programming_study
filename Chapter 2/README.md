@@ -181,3 +181,253 @@ function testMakePerson() {
 exports.testMakePerson = testMakePerson;
 //# sourceMappingURL=makePerson.js.map
 ```
+
+## 🦄 모듈 이해하기
+- 타입스크립트에서는 `index.ts`와 같은 소스 파일을 모듈(module)이라고 한다.
+- 코드 관리와 유지 보수를 편리하게 하려고 모듈마다 고유한 기능을 구현하는 방식으로 소스코드를 분할한다. 이러한 작업을 모듈화(modulization)라고 한다.
+- 타입스크립트는 이를 위해 `export`와 `import`라는 키워드를 제공한다.
+
+```ts
+let MAX_AGE = 100;
+
+interface IPerson {
+  name: string,
+  age: number,
+}
+
+class Person implements IPerson {
+  constructor(public name: string, public age: number) {};
+}
+
+function makeRandomNumber(max: number = MAX_AGE): number {
+  return Math.ceil((Math.random() * max));
+}
+
+const makePerson = 
+  ( name: string, age: number = makeRandomNumber()) => ({ name, age });
+
+const testMakePerson = (): void => {
+  let jane: IPerson = makePerson('Jane');
+  let jack: IPerson = makePerson('Jack');
+  console.log(jane, jack);
+}
+
+testMakePerson();
+```
+
+- 터미널에서 다음 명령으로 `index.ts` 파일을 실행한다.
+
+```bash
+> npm run dev
+```
+
+- 코드를 이해하고 수정할려하니 내용이 조금 복잡해보인다.
+- `index.ts` 파일의 내용을 분리해서 모듈화를 진행한다.
+
+### 🐇 index.ts 파일의 모듈화
+- `index.ts` 파일을 모듈화하기 위해 `src` 디렉터리 아래에 `person` 디렉터리를 생성 후 그 안에 `Person.ts`라는 이름의 파일을 만든다.
+- 그리고 `index.ts` 파일에서 다음과 같은 내용을 `Person.ts` 파일로 옮겨 적는다.
+
+```ts
+let MAX_AGE = 100;
+
+interface IPerson {
+  name: string,
+  age: number,
+}
+
+class Person implements IPerson {
+  constructor(public name: string, public age: number) {};
+}
+
+function makeRandomNumber(max: number = MAX_AGE): number {
+  return Math.ceil((Math.random() * max));
+}
+
+const makePerson = 
+  ( name: string, age: number = makeRandomNumber()) => ({ name, age });
+```
+
+- `index.ts`
+
+```ts
+const testMakePerson = (): void => {
+  let jane: IPerson = makePerson('Jane');
+  let jack: IPerson = makePerson('Jack');
+  console.log(jane, jack);
+}
+
+testMakePerson();
+```
+- 하지만 이 상태로 코드를 실행해 보면 오류가 발생한다.
+- 이 경우 타입스크립트의 `export`와 `import` 구문을 통해 해결할 수 있다.
+
+### 🐇 export 키워드
+- `Person.ts` 파일에 `IPerson`과 `makePerson` 선언부에 `export` 키워드를 추가한다.
+- `export` 키워드는 `interface`, `class`, `type`, `let`, `const` 키워드 앞에도 붙일 수 있다.
+
+```ts
+let MAX_AGE = 100;
+
+export interface IPerson {
+  name: string,
+  age: number,
+}
+
+class Person implements IPerson {
+  constructor(public name: string, public age: number) {};
+}
+
+function makeRandomNumber(max: number = MAX_AGE): number {
+  return Math.ceil((Math.random() * max));
+}
+
+export const makePerson = 
+  ( name: string, age: number = makeRandomNumber()): IPerson => ({ name, age });
+```
+
+### 🐇 import 키워드
+- 어떤 파일이 `export` 키워드로 내보낸 심벌을 받아서 사용하려면 `import` 키워드로 해당 심벌을 불러온다.
+
+```ts
+import { 심벌목록 } from '파일의 상대 경로';
+```
+
+- `index.ts`
+
+```ts
+import { IPerson, makePerson } from "./person/Person";
+
+const testMakePerson = (): void => {
+  let jane: IPerson = makePerson('Jane');
+  let jack: IPerson = makePerson('Jack');
+  console.log(jane, jack);
+}
+
+testMakePerson();
+```
+
+### 🐇 import * as 구문
+- `import` 구문의 또 다른 형태는 다음처럼 `as` 키워드를 함께 사용하는 것이다.
+
+```ts
+import * as 심벌 from '파일 상대 경로';
+```
+
+- `src/utils` 디렉터리에 `makeRandomNumber.ts` 라는 파일을 만들고 `Person.ts`에서 다음과 같은 내용을 옮겨 적는다.
+
+```ts
+let MAX_AGE = 100;
+
+export function makeRandomNumber(max: number = MAX_AGE): number {
+  return Math.ceil((Math.random() * max));
+}
+```
+
+- 그리고 `Person.ts` 파일을 열고 첫 줄에 다음과 같은 `import * as` 구문을 작성한 후 `U.` 코드를 추가한다.
+
+```ts
+import * as U from "../utils/makeRandomNumber";
+
+// 생략..
+
+export const makePerson = 
+  ( name: string, age: number = U.makeRandomNumber()): IPerson => ({ name, age });
+```
+- `makeRandomNumber`를 분리하였고, `Person.ts` 파일에서는 `U`라는 심벌로 접근할 수 있도록 `import * as` 구문을 지정했다.
+
+### 🐇 export default 키워드
+- 타입스크립트는 자바스크립트와 호환하기 위해 `export default` 구문을 제공한다.
+- `person` 디렉터리에 `IPerson.ts` 파일을 만들고 다음과 같이 작성한다.
+
+```ts
+export default interface IPerson {
+  name: string,
+  age: number,
+}
+```
+
+- `export default` 키워드는 한 모듈이 내보내는 기능 중 오직 한 개에만 붙일 수 있다.
+- `import`문으로 불러올 때 중괄호 `{}` 없이 사용할 수 있다.
+- `Person.ts` 파일을 수정한다.
+
+```ts
+import { makeRandomNumber } from "../utils/makeRandomNumber";
+import IPerson from "./IPerson";
+
+
+export default class Person implements IPerson {
+  constructor(public name: string, public age: number = makeRandomNumber()) {};
+}
+
+export const makePerson = 
+  ( name: string, age: number = makeRandomNumber()): IPerson => ({ name, age });
+```
+
+- `index.ts`를 다음과 같이 반영한다.
+
+```ts
+import IPerson from "./person/IPerson";
+import Person, { makePerson } from "./person/Person";
+
+const testMakePerson = (): void => {
+  let jane: IPerson = makePerson('Jane');
+  let jack: IPerson = new Person('Jack');
+  console.log(jane, jack);
+}
+
+testMakePerson();
+```
+
+### 🐇 외부 패키지를 사용할 때 import문
+- 다음처럼 `chance`와 `ramda`라는 패키지를 설치해준다.
+
+```bash
+> npm i -S chance ramda
+> npm i -D @types/chance @types/ramda
+```
+
+- `package.json`
+
+```json
+{
+  // 생략..
+  "devDependencies": { // -D 옵션
+    "@types/chance": "^1.1.1",
+    "@types/node": "^14.14.16",
+    "@types/ramda": "^0.27.34",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": { // -S 옵션
+    "chance": "^1.1.7",
+    "ramda": "^0.27.1"
+  }
+}
+```
+
+- `chance` 패키지는 가짜 데이터(fake data)를 만들어 주는 데 사용되며, `ramda`는 함수형 유틸리티 패키지이다.
+- `index.ts` 파일을 다음과 같이 수정한다.
+
+```ts
+import IPerson from "./person/IPerson";
+import Person from "./person/Person";
+
+import Chance from 'chance';
+import * as R from 'ramda';
+
+const chance = new Chance();
+
+let persons: IPerson[] = R.range(0, 2)
+  .map((n: number) => new Person(chance.name(), chance.age()));
+
+console.log(persons);
+```
+
+- `chance`와 `ramda`는 외부 패키지이므로 `node_modules` 디렉터리에 있다.
+- 따라서 경로에서 `./`등을 생략한 채 `import`를 할 수 있다.
+
+```bash
+> npm run dev
+> npm run build
+```
