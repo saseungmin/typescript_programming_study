@@ -1,5 +1,34 @@
 # 🐤 Chapter 2: 타입스크립트 프로젝트 생성과 관리
 
+<details><summary>Table of Contents</summary>
+
+- 🦄 타입스크립트 프로젝트 만들기 [:link:](#-타입스크립트-프로젝트-만들기)
+  - 🐇 프로젝트 생성자 관점에서 패키지 설치하기 [:link:](#-프로젝트-생성자-관점에서-패키지-설치하기)
+  - 🐇 프로젝트 이용자 관점에서 패키지 설치하기 [:link:](#-프로젝트-이용자-관점에서-패키지-설치하기)
+  - 🐇 tsconfig.json 파일 만들기 [:link:](#-tsconfigjson-파일-만들기)
+  - 🐇 src 디렉터리와 소스 파일 만들기 [:link:](#-src-디렉터리와-소스-파일-만들기)
+  - 🐇 package.json 수정 [:link:](#-packagejson-수정)
+- 🦄 모듈 이해하기 [:link:](#-모듈-이해하기)
+  - 🐇 index.ts 파일의 모듈화 [:link:](#-indexts-파일의-모듈화)
+  - 🐇 export 키워드 [:link:](#-export-키워드)
+  - 🐇 import 키워드 [:link:](#-import-키워드)
+  - 🐇 import * as 구문 [:link:](#-import--as-구문)
+  - 🐇 export default 키워드 [:link:](#-export-default-키워드)
+  - 🐇 외부 패키지를 사용할 때 import문
+ [:link:](#-외부-패키지를-사용할-때-import문)
+- 🦄 tsconfig.json 파일 살펴보기 [:link:](#-tsconfigjson-파일-살펴보기)
+  - 🐇 module 키 [:link:](#-module-키)
+  - 🐇 moduleResolution 키 [:link:](#-moduleResolution-키)
+  - 🐇 target 키 [:link:](#-target-키)
+  - 🐇 baseUrl과 outDir 키 [:link:](#-baseurl과-outdir-키)
+  - 🐇 paths 키 [:link:](#-paths-키)
+  - 🐇 esModuleInterop 키 [:link:](#-esModuleInterop-키)
+  - 🐇 sourceMap 키 [:link:](#-sourceMap-키)
+  - 🐇 downlevelIteration 키 [:link:](#-downleveliteration-키)
+  - 🐇 noImplicitAny 키 [:link:](#-noimplicitany-키)
+
+</details>
+
 ## 🦄 타입스크립트 프로젝트 만들기
 - 타입스크립트 개발은 Node.js 프로젝트를 만든 다음, 개발 언어를 타입스크립트로 설정하는 방식으로 진행한다.
 - 디렉터리를 하나 만들고 여기에 `package.json` 파일을 만드는 것으로 시작한다.
@@ -134,7 +163,7 @@ testMakePerson();
     "dev": "ts-node src",
     "build": "tsc && node dist"
   },
-  // 생략..
+  /* 생략 */
 }
 ```
 
@@ -181,6 +210,8 @@ function testMakePerson() {
 exports.testMakePerson = testMakePerson;
 //# sourceMappingURL=makePerson.js.map
 ```
+
+> [🔝위로가기](#-chapter-2-타입스크립트-프로젝트-생성과-관리)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
 
 ## 🦄 모듈 이해하기
 - 타입스크립트에서는 `index.ts`와 같은 소스 파일을 모듈(module)이라고 한다.
@@ -391,15 +422,15 @@ testMakePerson();
 
 ```json
 {
-  // 생략..
-  "devDependencies": { // -D 옵션
+  /* 생략.. */
+  "devDependencies": { /* -D 옵션 */
     "@types/chance": "^1.1.1",
     "@types/node": "^14.14.16",
     "@types/ramda": "^0.27.34",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
-  "dependencies": { // -S 옵션
+  "dependencies": { /* -S 옵션 */
     "chance": "^1.1.7",
     "ramda": "^0.27.1"
   }
@@ -431,6 +462,8 @@ console.log(persons);
 > npm run dev
 > npm run build
 ```
+
+> [🔝위로가기](#-chapter-2-타입스크립트-프로젝트-생성과-관리)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
 
 ## 🦄 tsconfig.json 파일 살펴보기
 - 터미널에서 `tsc --help`를 실행하면 다음과 같은 내용을 볼 수 있다.
@@ -484,8 +517,8 @@ Options:
 ```json
 {
   "compilerOptions": {
-    "module": "commonjs", // Node.js
-    "module": "amd", // 웹 브라우저
+    "module": "commonjs", /* Node.js */
+    "module": "amd", /* 웹 브라우저 */
   },
 }
 ```
@@ -523,3 +556,5 @@ Options:
 - 이런 형태의 코드는 타입스크립트 언어의 장점을 가진 것이 아니므로 코드에 문제가 있음을 알려준다.
 - 하지만 처음 배우는 사람의 입장에서는 오류 메시지의 의미가 직관적이지 않아 혼란을 준다.
 - 이 책에서는 `noImplicitAny`키 값을 `false`로 설정했다.
+
+> [🔝위로가기](#-chapter-2-타입스크립트-프로젝트-생성과-관리)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)

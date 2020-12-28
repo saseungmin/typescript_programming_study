@@ -11,3 +11,5 @@
 ### 📚 책 목차
 
 #### [🎈 Chapter 1: 타입스크립트와 개발 환경 만들기](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%201)
+
+#### [🎈 Chapter 2: 타입스크립트 프로젝트 생성과 관리](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%202)
