@@ -1,6 +1,6 @@
 interface IPerson {
-  name: string,
-  age: number,
+  name: string;
+  age: number;
 }
 
 let good: IPerson = { name: 'Jack', age: 32 };
@@ -13,9 +13,9 @@ let good: IPerson = { name: 'Jack', age: 32 };
 
 // 선택 속성
 interface IPerson2 {
-  name: string,
-  age: number,
-  etc?: boolean, // optional property
+  name: string;
+  age: number;
+  etc?: boolean; // optional property
 }
 
 let good1: IPerson2 = { name: 'Jack', age: 32 };

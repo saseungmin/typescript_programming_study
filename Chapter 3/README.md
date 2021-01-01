@@ -117,8 +117,8 @@ o = { first: 1, second: 2 };
 
 ```ts
 interface IPerson {
-  name: string,
-  age: number,
+  name: string;
+  age: number;
 };
 ```
 
@@ -126,8 +126,8 @@ interface IPerson {
 
 ```ts
 interface IPerson {
-  name: string,
-  age: number,
+  name: string;
+  age: number;
 };
 
 let good: IPerson = { name: 'Jack', age: 32 };
@@ -148,9 +148,9 @@ let bad4: IPerson = { name: 'Jack', age: 32, etc: true };
 
 ```ts
 interface IPerson2 {
-  name: string,
-  age: number,
-  etc?: boolean, // optional property
+  name: string;
+  age: number;
+  etc?: boolean; // optional property
 }
 
 let good1: IPerson2 = { name: 'Jack', age: 32 };
@@ -183,3 +183,315 @@ function printMe(me: { name: string, age: number, etc?: boolean }) {
 printMe(ai); // Jack 32
 ```
 
+## 🦄 객체와 클래스
+
+### 📚 클래스 선언문
+- 타입스크립트는 객체지향 언어에서 흔히 볼 수 있는 `class`, `private`, `public`, `protected`, `implements`, `extend`와 같은 키워드를 제공한다.
+- 문법적인 차이만 약간 있을 뿐 사실상 그 의미는 다른 언어와 같다.
+- 다음은 클래스 선언문 기본 형태이다.
+
+```ts
+class 클래스이름 {
+  [private | protected | public] 속성 이름[?]: 속성 타입[...]
+}
+```
+
+- 다음 코드는 `name`과 `age`라는 속성을 가진 클래스를 선언한다.
+
+```ts
+class Person1 {
+  name: string;
+  age?: number;
+}
+```
+
+- 다음 코드는 `Person1` 클래스에 `new` 연산자를 적용해 `jack1`이라는 이름의 `Person1` 타입 변수를 만든다.
+
+```ts
+let jack1: Person1 = new Person1();
+jack1.name = 'Jack';
+jack1.age = 32;
+console.log(jack1); // Person1 { name: 'Jack', age: 32 }
+```
+
+### 📚 접근 제한자
+- 클래스 속성은 `public`, `private`, `protect`와 같은 접근 제한자(access modifier)를 이름 앞에 붙일 수 있다. 만약 생략하면 모두 `public`으로 간주한다.
+
+### 📚 생성자
+- 타입스크립트 클래스는 `constructor`라는 이름의 특별한 메서드를 포함하는데, 이를 **생성자**라고 한다.
+- 다른 언어와 다르게 타입스크립트 클래스는 다음 코드처럼 클래스의 속성(name, age)을 선언할 수 있다.
+- 즉, 앞에서 작성한 `Person1`클래스와 똑같이 동작한다. 
+
+```ts
+class Person2 {
+  constructor(public name: string, public age?: number) {};
+}
+
+let jack2: Person2 = new Person2('Jack', 32);
+console.log(jack2); // Person2 { name: 'Jack', age: 32 }
+```
+
+- 타입스크립트는 생성자의 매개변수에 `public`과 같은 접근 제한자를 붙이면 해당 매개변수의 이름을 가진 속성이 클래스에 선언된 것처럼 동작한다.
+- 즉 다음과 같이 장황하게 구현된 것을 함축해서 구현한 것이다.
+
+```ts
+class Person3 {
+  name: string;
+  age?: number;
+  constructor(name: string, age?: number) {
+    this.name = name;
+    this.age = age;
+  };
+}
+
+let jack3: Person3 = new Person3('Jack', 32);
+console.log(jack3); // Person3 { name: 'Jack', age: 32 }
+```
+
+### 📚 인터페이스 구현
+- 타입스크립트 클래스는 인터페이스를 구현할 수 있다.
+- 클래스가 인터페이스를구현할 때는 다음처럼 `implements` 키워드를 사용한다.
+
+```ts
+class 클래스이름 implements 인터페이스이름 {
+  //...
+}
+```
+
+- 한 가지 앞으로 기억해 둬야 할 점은 **인터페이스는 이러이러한 속성이 있어야 한다는 규약(spec)에 불과할 뿐 물리적으로 해당 속성을 만들지 않는다는 점이다.**
+- 따라서 클래스 몸통에는 반드시 인터페이스가 정의하고 있는 속성을 멤버 속성으로 포함해야 한다.
+
+```ts
+interface IPerson4 {
+  name: string;
+  age?: number;
+}
+
+class Person4 implements IPerson4 {
+  name: string;
+  age: number;
+}
+```
+
+- 다음 코드는 앞서 본 `Person2` 구현 방식을 인터페이스 구현에 응용한 것이다.
+
+```ts
+interface IPerson4 {
+  name: string;
+  age?: number;
+}
+
+class Person4 implements IPerson4 {
+  constructor(public name: string, public age?: number) {};
+}
+
+export let jack4: IPerson4 = new Person4('Jack', 32);
+console.log(jack4); // Person4 { name: 'Jack', age: 32 }
+```
+
+### 📚 추상 클래스
+- 타입스크립트는 다른 언어처럼 `abstract` 키워드를 사용해 추상 클래스를 만들 수 있다.
+- 추상 클래스는 자신의 속성이나 메서드 앞에 `abstract`를 붙여 나를 상속하는 다른 클래스에서 이 속성이나 메서드를 구현하게 한다.
+
+```ts
+abstract class 클래스이름 {
+  abstract 속성이름: 속성타입;
+  abstract 메서드이름() {};
+}
+```
+
+- 다음 코드는 `name` 속성 앞에 `abstract`가 붙었으므로 `new` 연산자를 적용해 객체를 만들 수 없다.
+
+```ts
+abstract class AbstractPerson5 {
+  abstract name: string;
+  constructor(public age?: number) {}
+}
+```
+
+### 📚 클래스의 상속
+- 객체지향 언어는 부모 클래스를 상속받는 상속 클래스를 만들 수 있는데, 타입스크립트는 다음처럼 `extends` 키워드를 사용해 상속 클래스를 만든다.
+
+```ts
+class 상속클래스 extends 부모클래스 { /*...*/ }
+```
+
+- 다음 `Person5` 클래스는 `AbstractPerson5` 추상 클래스를 상속해 `AbstractPerson5`가 구현한 `age`를 얻고, `AbstractPerson5`를 상속받는 클래스가 구현해야 할 `name` 속성을 구현한다.
+- 참고로 타입스크립트에서는 부모 클래스의 생성자를 `super` 키워드로 호출할 수 있다.
+
+```ts
+abstract class AbstractPerson5 {
+  abstract name: string;
+  constructor(public age?: number) {}
+}
+
+class Person5 extends AbstractPerson5 {
+  constructor(public name: string, age?: number) {
+    super(age);
+  }
+}
+
+let jack5: Person5 = new Person5('Jack', 32);
+console.log(jack5); // Person5 { name: 'Jack', age: 32 }
+```
+
+### 📚 static 속성
+- 타입스크립트 클래스는 정적인 속성을 가질 수 있다.
+- 클래스의 정적 속성은 다음과 같은 형태로 선언한다.
+
+```ts
+class 클래스이름 {
+  static 정적속성이름: 속성타입
+}
+```
+
+- 다음처럼 정적 속성은 점 표기법을 사용해 값을 얻거나 설정할 수 있다.
+
+```ts
+class A {
+  static initValue = 1;
+}
+
+let initVal = A.initValue; // 1
+```
+
+## 🦄 객체의 비구조화 할당문
+- 다음처럼 인터페이스나 클래스를 사용해 관련된 정보를 묶어 새로운 타입으로 표현한다.
+- 이를 **구조화**(**structuring**)라고 한다.
+
+```ts
+export interface IPerson {
+  name: string;
+  age: number;
+}
+
+export interface ICompany {
+  name: string;
+  age: number;
+}
+```
+
+- 코드를 이처럼 구조화 하면 다음 코드에서 보듯 비슷한 유형의 변수를 쉽게 만들 수 있다.
+- 이로써 코드의 기능 확장이 수월해진다.
+
+```ts
+import { IPerson, ICompany } from "./IPerson_ICompany";
+
+let jack: IPerson = { name: 'Jack', age: 32},
+    jane: IPerson = { name: 'jane', age: 32};
+
+let apple: ICompany = { name: 'Apple', age: 42},
+    ms: ICompany = { name: 'Microsoft', age: 34};
+```
+
+### 📚 비구조화란?
+- 구조화된 데이터를 분해하는 것을 **비구조화**(**destructuring**)라고 한다.
+
+```ts
+let name = jack.name;
+let age = jack.age;
+```
+
+### 📚 비구조화 할당
+- 비구조화 할당을 객체에 적용하려면 얻고 싶은 속성을 중괄호로 묶는다.
+
+```ts
+import { IPerson } from "./IPerson_ICompany";
+
+let jack: IPerson = { name: 'Jack', age: 32};
+let {name, age} = jack; // 비구조화 할당
+
+console.log(name, age); // Jack 32
+```
+
+### 📚 잔여 연산자
+- 점을 연이어 3개를 사용하는 `...` 연산자는 사용되는 위치에 따라 **잔여 연산자**(**rest operator**) 혹은 **전개 연산자**(**spread operator**)라고 부른다.
+- 잔여 연산자 예
+
+```ts
+let address: any = {
+  country: 'Korea',
+  city: 'Seoul',
+  address1: 'Gangnam-gu',
+  address2: 'Sinsa-dong',
+  address3: '123-456',
+};
+
+const { country, city, ...detail} = address;
+
+console.log(detail); 
+// { address1: 'Gangnam-gu', address2: 'Sinsa-dong', address3: '123-456' }
+```
+
+### 📚 전개 연산자
+- 점 3개 연산자가 비구조화 할당문이 아닌 곳에서 사용될 때 이를 전개 연산자라고 한다.
+
+```ts
+let coord = { ...{ x: 0 }, ...{ y: 0 } };
+console.log(coord); // { x: 0, y: 0 }
+```
+
+- 전개 연산자는 의미 그대로 **객체의 속성을 모두 전개해 새로운 객체로 만들어 준다.**
+
+
+```ts
+let part1 = { name: 'jane' };
+let part2 = { age: 22 }; 
+let part3 = { city: 'Seoul', country: 'Kr'};
+
+let merged = { ...part1, ...part2, ...part3 };
+
+console.log(merged); // { name: 'jane', age: 22, city: 'Seoul', country: 'Kr' }
+```
+
+## 🦄 객체의 타입 변환
+
+### 📚 타입 변환
+- 타입이 있는 언어들은 특정 타입의 변숫값을 다른 타입의 값으로 변환할 수 있는 기능을 제공한다.
+- 이를 **타입 변환**(**type conversion**)이라고 한다.
+- 다음은 `person` 변수의 타입은 `object`이다. 그런데 `object` 타입은 `name` 속성을 가지지 않으므로 오류가 발생한다.
+
+```ts
+let person: object = { name: 'Jack', age: 32 };
+person.name // 'object' 형식에 'name' 속성이 없습니다.
+```
+
+- 다음은 이 오류를 타입 변환 구문을 사용해 해결한 것이다.
+- `person` 변수를 일시적으로 `name` 속성이 있는 타입, 즉 `{name: string}` 타입으로 변환해 `person.name` 속성값을 얻게 했다.
+
+```ts
+let person: object = { name: 'Jack', age: 32 };
+
+(<{name:string}>person).name;
+```
+
+### 📚 타입 단언
+- 그런데 타입스크립트는 타입 변환이 아닌 **타입 단언**(**type assertion**)이라는 용어를 사용한다.
+- 타입 단언문은 다음 두 가지 형태가 있다.
+
+```ts
+(<타입>객체)
+(객체 as 타입)
+```
+
+- 인터페이스를 구현한 `INameable.ts` 파일을 만든다.
+
+```ts
+export default interface INameable {
+  name: string
+};
+```
+
+- 다음 코드는 타입 단언의 두 가지 형태이다.
+
+```ts
+import INameable from './INameable';
+
+let obj: object = { name: 'Jack' };
+
+let name1 = (<INameable>obj).name;
+let name2 = (obj as INameable).name;
+
+console.log(name1, name2); // Jack Jack
+```
+- 둘의 차이는 형태만 다를 뿐 내용상으로는 같다.
