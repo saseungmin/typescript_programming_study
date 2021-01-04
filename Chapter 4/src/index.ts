@@ -1,4 +1,6 @@
+import { A } from "./utils/A";
 import { add, NumberToNumberFunc } from "./utils/add";
+import { B } from "./utils/B";
 import { makeObject } from "./utils/indexable-key";
 import { init } from "./utils/init";
 import { calc } from "./utils/nested";
@@ -18,3 +20,9 @@ console.log(result);
 console.log(add(1)(2));
 
 console.log(makeObject('name','Jack'));
+
+let a: A = new A;
+a.method(); // value: 1
+
+let b: B = new B(2);
+b.method(); // value: 2
