@@ -253,3 +253,112 @@ let value =
 ```ts
 const f = () => {}
 ```
+
+## 🦄 화살표 함수와 표현식 문
+- 화살표 함수의 몸통은 `function` 떄와는 다르게 다음처럼 중괄호를 사용할 수도 있고 생략할 수도 있다.
+
+```ts
+const arrow1 = (a: number, b: number): number => { return a + b }
+const arrow2 = (a: number, b: number): number => a + b;
+```
+
+- 중괄호 사용 여부에 따라 타입스크립트 문법이 동작하는 방식이 실행문(execution statement) 방식과 표현식 문(expression statement) 방식으로 달라진다.
+
+### 📚 실행문과 표현식 문
+- 다음처럼 변수에 값을 대입하는 것은 대표적인 실행문이다.
+
+```ts
+let x
+x = 1
+```
+- 반면에 다음과 같은 코드에서 `x > 10` 부분은 CPU가 평가한 후 `true`나 `false`라는 값으로 결과를 알려주지 않으면 `if`문이 정상적으로 동작할 수 없다.
+
+```ts
+let x = 10
+if(x > 0)
+  x = 1
+```
+
+- 그런데 만일 프로그래밍 문법이 다음과 같다면 코드를 작성하기게 번거로워진다.
+
+```js
+if(return x > 0)
+  x = 1
+```
+
+- 즉, 똑같이 CPU에서 실행되는 구문이더라도 x > 0처럼 `return` 키워드 없이 결괏값을 반환하는 실행문이 필요하다. 이를 **표현식 문**이라고 구분해서 부른다.
+
+### 📚 복합 실행문
+- 프로그래밍 언어에서 `if`와 같은 구문은 다음처럼 조건을 만족하면 단순히 한 줄의 실행문만을 실행하는 형태로 설계한다.
+
+```js
+if(조건식)
+  실행문
+```
+
+- 이런 설계가 가능한 이유는 복합 실행문이라는 또 다른 형태를 함께 제공하기 때문이다.
+
+```js
+if(조건식) {
+  실행문1
+  실행문2
+}
+```
+
+- 복합 실행문은 컴파일러로 하여금 여러 실행문을 한 개처럼 인식하게 한다. 따라서 컴파일러는 앞의 형태로 작성된 `if`문은 여전히 한 줄의 실행문으로 인식한다.
+
+### 📚 함수 몸통과 복합 실행문
+- `function` 키워드로 만드는 함수는 반드시 몸통을 중괄호로 감싸야 하는데, 여기서 중괄호는 앞서 설명한 복합 실행문을 의미한다.
+- 따라서 함수 몸통은 다음처럼 여러 중ㄹ로 구현할 수 있다.
+
+```js
+function f() {
+  let x = 1, y = 2;
+  let result = x + y + 10;
+}
+```
+
+### 📚 return 키워드
+- 실행문은 CPU에서 실행된 결과를 알려주지 않는다.
+- 예를 들어, 함수 몸통을 복합 실행문으로 구현한 다음 함수는 `true`나 `false`를 반환하지 않는다.
+
+```ts
+function isGreater(a: number, b: number): boolean {
+  a > b; // 결과 반환 x
+}
+```
+
+- 실행문 기반 언어는 이 문제를 해결하려고 `return`이라는 키워드 도입했다.
+
+```ts
+function isGreater(a: number, b: number): boolean {
+  return a > b; // true or false
+}
+```
+
+### 📚 표현식 문 스타일의 화살표 함수 구현
+
+- 다음 `function` 스타일 함수 `isGreater`를 호살표 함수로 구현하면 다음과 같다.
+
+```ts
+const isGreater = (a: number, b: number): boolean => {
+  return a > b;
+}
+```
+
+- `return`을 생략하고 다음처럼 구현할 수도 있다.
+
+```ts
+const isGreater = (a: number, b: number): boolean => a > b;
+```
+
+### 📚 표현식과 표현식 문의 차이
+- 다음 코드에서 2행에 있는 `a > b` 코드는 C언어에서 표현식이라고 했기 때문에 그 이후에 만들어진 프로그래밍 언어들로 같은 의미로 표현식이라고 생각한다.
+- 반면에 표현식 지향 언어 관점에서 3행의 `a > b` 코드는 그 자체가 실행문이다.
+
+```ts
+let a = 1, b = 0;
+if(a > b) console.log('a is greater than b');
+const isGreater = (a: number, b: number): boolean => a > b;
+```
+- 이 둘을 구분하고자 표현식과 표현식 문으로 구분한 것이다.
