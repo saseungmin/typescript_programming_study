@@ -362,3 +362,106 @@ if(a > b) console.log('a is greater than b');
 const isGreater = (a: number, b: number): boolean => a > b;
 ```
 - 이 둘을 구분하고자 표현식과 표현식 문으로 구분한 것이다.
+
+## 🦄 일등 함수 살펴보기
+
+### 📚 콜백 함수
+- 일등 함수(first-class-function) 기능을 제공하는 언어에서 함수는 함수 표현식이라는 일종의 값이다. 따라서 변수에 담을 수 있다.
+- 이 말은 함수 표현식을 매개변수로 받을 수 있다는 것을 의미한다.
+- 이처럼 매개변수 형태로 동작하는 함수를 콜백 함수라고 한다.
+- 다음 코드는 콜백 함수 사용 예이다.
+
+```ts
+// init.ts
+export const init = (callback: () => void): void => {
+  console.log('default initialization finished.');
+  callback();
+  console.log('all initialization finished.');
+}
+
+// callback.ts
+import { init } from "./init";
+
+init(() => console.log('custom initialization finished.'));
+
+// default initialization finished.
+// custom initialization finished.
+// all initialization finished.
+```
+
+### 📚 중첩함수
+- 함수형 언어에서 함수는 변수에 담긴 함수 표현식이므로 함수 안에 또 다른 함수를 중첩해서 구현할 수 있다.
+
+```ts
+const calc = (value: number, cb: (number) => void): void => {
+  let add = (a, b) => a + b;
+  function multiply(a, b) {
+    return a * b;
+  }
+
+  let result = multiply(add(1, 2), value);
+  cb(result);
+}
+
+calc(30, (result: number) => console.log(`result is ${result}`));
+// result is 90
+```
+
+### 📚 고차 함수와 클로저, 그리고 부분 함수
+- 고차 함수(high-order function)는 **또 다른 함수를 반환하는 함수를 말한다.**
+- 함수형 언어에서 함수는 단순히 함수 표현식이라는 값이므로 다른 함수를 반환할 수 있다.
+- 다음은 고차 함수의 예이다.
+
+```ts
+const add = (a: number): (number) => number => (b: number): number => a + b;
+const result = add(1)(2);
+console.log(result); // 3
+```
+
+- 위 구문을 더 이해하기 쉬운 형태로 다시 구현한 것이다.
+- 다음 코드는 `number` 타입의 매개변수를 받아 `number` 타입의 값을 반환하는 함수 시그니처를 `NumberToNumberFunc` 타입으로 정의한다.
+
+```ts
+type NumberToNumberFunc = (number) => number
+```
+
+- 이제 `NumberToNumberFunc` 타입의 함수를 반환하는 `add`와 같은 함수를 만들 수 있다.
+
+```ts
+export const add = (a: number): NumberToNumberFunc => {
+  // NumberToNumberFunc 타입의 함수 반환
+}
+```
+
+- 다음으로 `add`의 반환값을 중첩 함수로 구현할 수 있다.
+- `_add`의 몸통을 구현하면 다음처럼 `add`라는 이름의 고차 함수가 완성된다.
+
+```ts
+export type NumberToNumberFunc = (number) => number
+export const add = (a: number): NumberToNumberFunc => {
+  const _add: NumberToNumberFunc = (b: number): number => {
+    return a + b; // 클로저
+  }
+  return _add;
+}
+```
+
+- `a`는 `_add` 함수의 관점에서만 보면 외부에서 선언된 변수이다.
+- 함수형 프로그래밍 언어에서는 다음과 같은 형태를 **클로저(closure)** 라고 한다.
+- `NumberToNumberFunc` 타입의 값을 반환하는 함수이므로 다음과 같은 코드를 작성할 수 있다.
+
+```ts
+let fn1: NumberToNumberFunc = add(1);
+let result = fn1(2);
+console.log(result); // 3
+
+console.log(add(1)(2)); // 3
+```
+
+- 위와 같이 2차 고차함수인 `add`는 `add(1)(2)` 처럼 함수 호출 연ㄴ산자를 두 개 사용해야만 함수가 아닌 값을 얻을 수 있다.
+
+```js
+const multiply = a => b => c => a * b * c;
+```
+- 만약 3차 고차함수인 경우에 두 개만 붙이면 아직 값이 아닌 함수이다.
+- 이것을 부분 애플리케이션 혹은 **부분 적용 함수**(**partially applied function**)라고 한다.
