@@ -465,3 +465,65 @@ const multiply = a => b => c => a * b * c;
 ```
 - 만약 3차 고차함수인 경우에 두 개만 붙이면 아직 값이 아닌 함수이다.
 - 이것을 부분 애플리케이션 혹은 **부분 적용 함수**(**partially applied function**)라고 한다.
+
+## 🦄 함수 구현 기법
+
+### 📚 매개변수 기본값 지정하기
+- 선택적 매개변수는 항상 그 값이 `undefined`로 고정된다.
+- 만일, 함수 호출 시 인수를 전달하지 않더라도 매개변수에 어떤 값을 설정하고 싶다면 매개변수의 기본값을 지정할 수 있다.
+- 이를 디폴트 매개변수라고 한다.
+
+```ts
+export type Person = {
+  name: string, age: number
+}
+
+export const makePerson = (name: string, age: number = 10): Person => {
+  const person = { name, age }; // 단축 구문
+  return person;
+}
+
+console.log(makePerson('Jack')); // { name: 'Jack', age: 10 }
+```
+
+### 📚 객체를 반환하는 화살표 함수 만들기
+- 컴파일러가 `{}`를 객체로 해석하게 하려면 다음처럼 객체를 소괄호로 감싸주어야 한다.
+
+```ts
+export const makePerson = (name: string, age: number = 10): Person => ({ name, age });
+```
+
+### 📚 매개변수에 비구조화 할당문 사용하기
+- 함수의 매개변수도 변수의 일종이므로 다음처럼 비구조화 할당문을 적용할 수 있다.
+
+```ts
+export type Person = {
+  name: string, age: number
+}
+
+export const makePerson = ({name, age}: Person): void => 
+  console.log(`name: ${name}, age: ${age}`);
+
+console.log(makePerson({ name: 'Jack', age: 10} )); // { name: 'Jack', age: 10 }
+```
+
+### 📚 색인 키와 값으로 객체 만들기
+
+```ts
+const makeObject = (key, value) => ({ [key]: value });
+console.log(makeObject('name', 'Jack')); // { name: 'Jack' }
+```
+
+- 타입스크립트에서는 `{ [key]: value }` 형태의 타입을 색인 가능 타입이라고 하며, 다음과 같은 형태로 `key`와 `value`의 타입을 명시한다.
+
+```ts
+export type KeyValueType = {
+  [key: string]: string
+}
+
+export const makeObject = (key: string, value: string): KeyValueType => ({
+  [key]: value,
+});
+
+console.log(makeObject('name','Jack')); // { name: 'Jack' }
+```

@@ -1,4 +1,5 @@
 import { add, NumberToNumberFunc } from "./utils/add";
+import { makeObject } from "./utils/indexable-key";
 import { init } from "./utils/init";
 import { calc } from "./utils/nested";
 import { fn } from "./utils/optional-arg";
@@ -15,3 +16,5 @@ console.log(fn1);
 let result = fn1(2);
 console.log(result);
 console.log(add(1)(2));
+
+console.log(makeObject('name','Jack'));
