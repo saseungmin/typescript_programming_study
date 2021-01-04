@@ -2,34 +2,44 @@
 
 <details><summary>Table of Contents</summary>
 
-- 🦄 타입스크립트 변수 선언문 [:link:](#-타입스크립트-변수-선언문)
-  - 📚 타입스크립트 기본 제공 타입 [:link:](#-타입스크립트-기본-제공-타입)
-  - 📚 let과 const 키워드 [:link:](#-let과-const-키워드)
-  - 📚 타입 주석 [:link:](#-타입-주석)
-  - 📚 타입 추론 [:link:](#-타입-추론)
-  - 📚 any 타입 [:link:](#-any-타입)
-  - 📚 undefined 타입 [:link:](#-undefined-타입)
-  - 📚 템플릿 문자열 [:link:](#-템플릿-문자열)
-- 🦄 객체와 인터페이스 [:link:](#-객체와-인터페이스)
-  - 📚 인터페이스 선언문 [:link:](#-인터페이스-선언문)
-  - 📚 선택 속성 구문 [:link:](#-선택-속성-구문)
-  - 📚 익명 인터페이스 [:link:](#-익명-인터페이스)
-- 🦄 객체와 클래스 [:link:](#-객체와-클래스)
-  - 📚 클래스 선언문 [:link:](#-클래스-선언문)
-  - 📚 접근 제한자 [:link:](#-접근-제한자)
-  - 📚 생성자 [:link:](#-생성자)
-  - 📚 인터페이스 구현 [:link:](#-인터페이스-구현)
-  - 📚 추상 클래스 [:link:](#-추상-클래스)
-  - 📚 클래스의 상속 [:link:](#-클래스의-상속)
-  - 📚 static 속성 [:link:](#-static-속성)
-- 🦄 객체의 비구조화 할당문 [:link:](#-객체의-비구조화-할당문)
-  - 📚 비구조화란? [:link:](#-비구조화란)
-  - 📚 비구조화 할당 [:link:](#-비구조화-할당)
-  - 📚 잔여 연산자 [:link:](#-잔여-연산자)
-  - 📚 전개 연산자 [:link:](#-전개-연산자)
-- 🦄 객체의 타입 변환 [:link:](#-객체의-타입-변환)
-  - 📚 타입 변환 [:link:](#-타입-변환)
-  - 📚 타입 단언 [:link:](#-타입-단언)
+- 🦄 함수 선언문 [:link:](#-함수-선언문)
+  - 📚 매개변수와 반환값의 타입 주석 생략 [:link:](#-매개변수와-반환값의-타입-주석-생략)
+  - 📚 void 타입 [:link:](#-void-타입)
+  - 📚 함수 시그니처 [:link:](#-함수-시그니처)
+  - 📚 type 키워드로 타입 별칭 만들기 [:link:](#-type-키워드로-타입-별칭-만들기)
+  - 📚 undefined 관련 주의 사항 [:link:](#-undefined-관련-주의-사항)
+  - 📚 선택적 매개변수 [:link:](#-선택적-매개변수)
+- 🦄 함수 표현식 [:link:](#-함수-표현식)
+  - 📚 함수는 객체다 [:link:](#-함수는-객체다)
+  - 📚 일등 함수 [:link:](#-일등-함수)
+  - 📚 표현식 [:link:](#-표현식)
+  - 📚 함수 표현식 [:link:](#-함수-표현식)
+  - 📚 계산법 [:link:](#-계산법)
+  - 📚 함수 호출 연산자 [:link:](#-함수-호출-연산자)
+  - 📚 익명 함수 [:link:](#-익명-함수)
+  - 📚 const 키워드와 함수 표현식 [:link:](#-const-키워드와-함수-표현식)
+- 🦄 화살표 함수와 표현식 문 [:link:](#-화살표-함수와-표현식-문)
+  - 📚 실행문과 표현식 문 [:link:](#-실행문과-표현식-문)
+  - 📚 복합 실행문 [:link:](#-복합-실행문)
+  - 📚 함수 몸통과 복합 실행문 [:link:](#-함수-몸통과-복합-실행문)
+  - 📚 return 키워드 [:link:](#-return-키워드)
+  - 📚 표현식 문 스타일의 화살표 함수 구현 [:link:](#-표현식-문-스타일의-화살표-함수-구현)
+  - 📚 표현식과 표현식 문의 차이 [:link:](#-표현식과-표현식-문의-차이)
+- 🦄 일등 함수 살펴보기 [:link:](#-일등-함수-살펴보기)
+  - 📚 콜백 함수 [:link:](#-콜백-함수)
+  - 📚 중첩함수 [:link:](#-중첩함수)
+  - 📚 고차 함수와 클로저, 그리고 부분 함수 [:link:](#-고차-함수와-클로저-그리고-부분-함수)
+- 🦄 함수 구현 기법 [:link:](#-함수-구현-기법)
+  - 📚 매개변수 기본값 지정하기 [:link:](#-매개변수-기본값-지정하기)
+  - 📚 객체를 반환하는 화살표 함수 만들기 [:link:](#-객체를-반환하는-화살표-함수-만들기)
+  - 📚 매개변수에 비구조화 할당문 사용하기 [:link:](#-매개변수에-비구조화-할당문-사용하기)
+  - 📚 색인 키와 값으로 객체 만들기 [:link:](#-색인-키와-값으로-객체-만들기)
+- 🦄 클래스 메서드 [:link:](#-클래스-메서드)
+  - 📚 function 함수와 this 키워드 [:link:](#-function-함수와-this-키워드)
+  - 📚 메서드란? [:link:](#-메서드란)
+  - 📚 클래스 메서드 구문 [:link:](#-클래스-메서드-구문)
+  - 📚 정적 메서드 [:link:](#-정적-메서드)
+  - 📚 메서드 체인 [:link:](#-메서드-체인)
 
 </details>
 
@@ -174,6 +184,8 @@ fn('hello'); // arg: undefined
 type OptionalArgFunc = (string, number?) => void
 ```
 
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ## 🦄 함수 표현식
   
 ### 📚 함수는 객체다
@@ -253,6 +265,8 @@ let value =
 ```ts
 const f = () => {}
 ```
+
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
 
 ## 🦄 화살표 함수와 표현식 문
 - 화살표 함수의 몸통은 `function` 떄와는 다르게 다음처럼 중괄호를 사용할 수도 있고 생략할 수도 있다.
@@ -363,6 +377,8 @@ const isGreater = (a: number, b: number): boolean => a > b;
 ```
 - 이 둘을 구분하고자 표현식과 표현식 문으로 구분한 것이다.
 
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ## 🦄 일등 함수 살펴보기
 
 ### 📚 콜백 함수
@@ -466,6 +482,8 @@ const multiply = a => b => c => a * b * c;
 - 만약 3차 고차함수인 경우에 두 개만 붙이면 아직 값이 아닌 함수이다.
 - 이것을 부분 애플리케이션 혹은 **부분 적용 함수**(**partially applied function**)라고 한다.
 
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ## 🦄 함수 구현 기법
 
 ### 📚 매개변수 기본값 지정하기
@@ -527,6 +545,8 @@ export const makeObject = (key: string, value: string): KeyValueType => ({
 
 console.log(makeObject('name','Jack')); // { name: 'Jack' }
 ```
+
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
 
 ## 🦄 클래스 메서드
 
@@ -631,3 +651,5 @@ let calc = new Calculator;
 let result = calc.add(1).add(2).multiply(3).multiply(4).value;
 console.log(result); // 36
 ```
+
+> [🔝위로가기](#-Chapter-4-함수와-메서드)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)

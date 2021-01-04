@@ -15,3 +15,5 @@
 #### [🎈 Chapter 2: 타입스크립트 프로젝트 생성과 관리](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%202)
 
 #### [🎈 Chapter 3: 객체와 타입](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%203)
+
+#### [🎈 Chapter 4: 함수와 메서드](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%204)
