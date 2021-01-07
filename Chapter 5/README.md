@@ -446,3 +446,185 @@ let reduceSum: number = range(1, 100 + 1)
 
 console.log(reduceSum); // 5050
 ```
+
+## 🦄 순수 함수와 배열
+- 함수형 프로그래밍에서 함수는 **순수 함수**(**pure function**)라는 조건을 만족해야 한다.
+- 그러나 타입스크립트의 `Array` 클래스에는 순수 함수 조건에 부합하지 않는 메서드가 많다.
+
+### 📚 순수 함수란?
+- 순수 함수는 **부수 효과**(**side-effect**)가 없는 함수를 말한다.
+- 여기서 부수 효과란 **함수가 가진 고유한 목적 이외에 다른 효과가 나타나는 것**을 의미하며 부작용이라고도 한다.
+- 반면에 부수 효과가 있는 함수를 **불순 함수**(**impure function**)라고 한다.
+- 함수형 프로그래밍에서 발생하는 부수 효과는 함수를 **순수 함수 형태로 작성해야만 제거할 수 있다.**
+- 부수 효과가 없는 순수한 함수이려면 다음과 같은 조건을 충족해야 한다.
+
+> - 함수 몸통에 **입출력 관련 코드**가 없어야 한다.
+> - 함수 몸통에서 **매개변숫값을 변경**시키지 않는다. (즉, 매개변수는 `const`나 `readonly` 형태로만 사용한다.)
+> - 함수 몸통에서 만들어진 **결과를 즉시 반환**한다.
+> - 함수 내부에 **전역 변수나 정적 변수**를 사용하지 않는다.
+> - 함수가 **예외를 발생**시키지 않는다.
+> - 함수가 **콜백 함수**로 구현되어있거나 함수 몸통에 콜백 함수를 사용하는 코드가 없다.
+> - 함수 몸통에 `Promise`와 같은 **비동기 방식으로 동작**하는 코드가 없다.
+
+- 예를 들어, 다음 `pure` 함수는 이런 조건을 모두 만족하는 순수 함수이다.
+
+```ts
+function pure(a: number, b: number): number {
+  return a + b;
+}
+```
+
+- 그로나 다음 impure1 함수는 매개변수를 변경하므로 부수 효과가 발생한다. 즉, 매개변수가 `readonly` 형태로 동작하지 않으므로 불순 함수이다.
+
+```ts
+function impure1(array: number[]): void {
+  array.push(1);
+  array.splice(0, 1);
+}
+```
+
+- 다음 `impure2` 함수는 `g`라는 외부 변수를 사용ㅎ므로 불순 함수이다.
+
+```ts
+let g = 10;
+function impure2(x: number) {
+  return x + g;
+}
+```
+
+### 📚 타입 수정자 readonly
+- 타입스크립트는 순수 함수 구현을 쉽게 하도록 `readonly` 키워드를 제공한다.
+- `readonly` 타입으로 선언된 매개변숫값을 **변경하는 시도가 있으면 다음처럼 문제가 있는 코드라고 알려줘서 불순 함수가 되지 않게 방지한다.**
+
+```ts
+function forcePure(array: readonly number[]){
+  array.push(1); // 'readonly number[]' 형식에 'push' 속성이 없습니다.
+}
+```
+
+- 타입스크립트에서 인터페이스, 클래스, 함수의 매개변수 등은 `let`이나 `const` 키워드 없이 선언하기 때문에 이런 심벌에 `const`와 같은 효과를 주려면 `readonly`라는 타입 수정자가 필요하다.
+
+### 📚 불변과 가변
+- 변수 `const`나 `readonly`를 명시하고 있으면 변숫값은 초깃값을 항상 유지한다.
+- 이런 변수를 **불변(immutable) 변수**라고 한다.
+- 반면에 `let`이나 `readonly`를 명시하지 않은 변수를 언제든 값을 변경할 수 있다. 이런 변수는 **가변(mutable) 변수**라고 한다.
+
+### 📚 깊은 복사와 앝은 복사
+- **순수 함수를 구현할 때는 매개변수가 불변성을 유지해야 하므로**, 매개변수를 가공하려고 할 때 깊은 복사가 실행해 **매개변수값이 변경되지 않게 해야 한다.**
+- 깊은 복사는 대상 변숫값이 바뀔 때 원본 변수값은 그대로인 형태로 동작한다.
+
+```ts
+let original = 1;
+let copied = original;
+copied += 2;
+console.log(original, copied); // 1 3
+```
+- 타입스크립트에서 `number`와 `boolean` 타입은 깊은 복사 형태로 동작한다.
+- 그러나 **객체와 배열은 얕은 복사 방식으로 동작한다.**
+
+```ts
+const originalArray = [5, 3, 9, 7];
+const shallowCopiedArray = originalArray;
+shallowCopiedArray[0] = 0;
+console.log(originalArray, shallowCopiedArray); // [ 0, 3, 9, 7 ] [ 0, 3, 9, 7 ]
+```
+
+### 📚 전개 연산자와 깊은 복사
+- 전개 연산자를 사용해 배열을 복사하면 깊은 복사를 할 수 있다.
+
+```ts
+const oArray = [1, 2, 3, 4];
+const deepCopiedArray = [...oArray];
+deepCopiedArray[0] = 0;
+console.log(oArray, deepCopiedArray); // [ 1, 2, 3, 4 ] [ 0, 2, 3, 4 ]
+```
+
+### 📚 배열의 sort 메서드를 순수 함수로 구현하기
+- `sort` 메서드는 원본 배열의 내용을 변경한다.
+- 다음 `pureSort` 함수는 `readonly` 타입으로 입력 배열의 내용을 유지한 채 정렬할 수 있도록 전개 연산자의 깊은 복사 기능을 사용한다.
+
+```ts
+const pureSort = <T>(array: readonly T[]): T[] => {
+  let deepCopied = [...array];
+  return deepCopied.sort();
+}
+
+let beforeSort = [6, 2, 9, 0];
+const afterSort = pureSort(beforeSort);
+console.log(beforeSort, afterSort); // [ 6, 2, 9, 0 ] [ 0, 2, 6, 9 ]
+```
+
+### 📚 배열의 filter 메서드와 순수한 삭제
+- 배열에서 특정 아이템을 삭제할 때는 `splice` 메서드를 사용한다. 그런데 `splice`는 원본 배열의 내용을 변경하므로 순수 함수에서는 사용할 수 없다. 그렇기 때문에 `filter` 메서드를 사용할 수 있다.
+- `filter` 메서드를 사용하면 원본 배열의 내용을 훼손하지 않으면서 조건에 맞지 않는 아이템을 삭제할 수 있다.
+
+```ts
+const pureDelete = <T>(array: readonly T[], cb: (val: T, index?: number) 
+  => boolean): T[] => array.filter((val, index) => cb(val, index) == false);
+
+const mixedArray: object[] = [
+  [], { name: 'Jack' }, { name: 'Jane', age: 32 }, ['description']
+]
+
+const objectsOnly: object[] = pureDelete(mixedArray, (val) => Array.isArray(val));
+
+console.log(mixedArray, objectsOnly);
+// [ [], { name: 'Jack' }, { name: 'Jane', age: 32 }, [ 'description' ] ] 
+// [ { name: 'Jack' }, { name: 'Jane', age: 32 } ]
+```
+
+### 📚 가변 인수 함수와 순수 함수
+- 함수를 호출할 때 전달하는 인수의 개수를 제한하지 않는 것을 **가변 인수**(**variadic arguments**)라고 한다.
+
+```ts
+const mergedArray: number[] = mergeArray(
+  [1], [2, 3], [4, 5, 6], [7, 8, 9, 10],
+)
+
+console.log(mergedArray); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+```
+
+- 다음 코드는 가변 인수로 호출할 수 있는 `mergeArray` 함수이다.
+
+```ts
+export const mergeArray = (...arrays) => {};
+```
+
+- 타입에 상관 없이 동작하게 하려면 다음 처럼 제네릭 타입으로 구현한다.
+
+```ts
+export const mergeArray = <T>(...arrays) => {};
+```
+
+- 또한, `mergeArray` 함수를 호출할 때 전달하는 값은 모두 배열이였다. 따라서 매개변수 `arrays`의 타입은 배열의 배열로 선언한다.
+
+```ts
+export const mergeArray = <T>(...arrays: T[][]) => {};
+```
+
+- `mergeArray` 함수의 매개변수 `arrays`는 배열의 배열인 `T[][]` 타입일지라도 출력은 `T[]`형태의 배열을 반환해야 한다.
+
+```ts
+export const mergeArray = <T>(...arrays: T[][]): T[] => {};
+```
+
+- 마지막으로 `mergeArray` 함수를 **순수 함수**로 구현하려면 매개변수의 내용을 훼손하지 말아야 한다. 따라서 다음처럼 매개변수 타입 앞에 `readonly` 키워드를 입력한다.
+
+```ts
+export const mergeArray = <T>(...arrays: readonly T[][]): T[] => {};
+```
+- `mergeArray` 함수를 구현하면 다음과 같다.
+
+```ts
+export const mergeArray = <T>(...arrays: readonly T[][]): T[] => {
+  let result: T[] = [];
+  
+  for (let index = 0; index < arrays.length; index++) {
+    const array: T[] = arrays[index];
+
+    result = [...result, ...array];
+  }
+
+  return result;
+}
+```
