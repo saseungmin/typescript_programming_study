@@ -388,3 +388,61 @@ let result = fold(
 
 console.log(result); // 338350
 ```
+
+## 🦄 배열의 map, reduce, filter 메서드
+
+### 📚 filter 메서드
+- 배열의 타입이 `T[]`일 때 배열의 `filter` 메서드는 다음과 같은 형태로 설계되었다.
+
+```ts
+filter(callback: (value: T, index?: number): boolean): T[]
+```
+
+- 다음 코드는 `filter` 메서드를 사용해 구현한 예이다.
+
+```ts
+import { range } from "./range";
+
+const array: number[] = range(1, 10 + 1);
+
+let odds: number[] = array.filter((value) => value % 2 !== 0);
+let evens: number[] = array.filter((value) => value % 2 === 0);
+
+console.log(odds, evens); // [ 1, 3, 5, 7, 9 ] [ 2, 4, 6, 8, 10 ]
+```
+
+### 📚 map 메서드
+- 배열의 타입이 `T[]`일 때 배열의 `map` 메서드는 다음과 같은 형태로 설계되었으며, `filter`와 달리 `map` 메서드는 입력 타입과 다른 타입의 배열을 만들 수 있다.
+
+```ts
+map(callback: (value: T, index? number): Q): Q[]
+```
+- 다음 코드는 `map` 메서드를 사용해 구현한 예로 `number[]` 타입 배열의 `string[]` 타입 배열로 가공하는 예이다.
+
+```ts
+import { range } from "./range";
+
+let square: string[] = range(1, 5 + 1)
+  .map((val, index) => `[${index}]: ${val}`);
+
+console.log(square); // [ '[0]: 1', '[1]: 2', '[2]: 3', '[3]: 4', '[4]: 5' ]
+```
+
+### 📚 reduce 메서드
+- 구현한 `fold` 함수는 타입스크립트 배열의 `reduce` 메서드로 대체할 수 있다.
+- 배열의 타입이 `T[]`일 때 배열의 `reduce` 메서드는 다음과 같은 형태로 설계되었다.
+
+```ts
+reduce(callback: (result: T, value: T), initialValue: T): T;
+```
+
+- 다음은 1부터 100까지 더하는 로직을 `reduce` 메서드를 사용해 다시 구현한 예이다.
+
+```ts
+import { range } from "./range";
+
+let reduceSum: number = range(1, 100 + 1)
+  .reduce((result: number, value: number) => result + value, 0);
+
+console.log(reduceSum); // 5050
+```
