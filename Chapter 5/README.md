@@ -1,5 +1,48 @@
 # 🐤 Chapter 5: 배열과 튜플
 
+<details><summary>Table of Contents</summary>
+
+- 🦄 배열 이해하기 [:link:](#-배열-이해하기)
+  - 📚 [] 단축 구문 [:link:](#-단축-구문)
+  - 📚 자바스크립트에서 배열은 객체다 [:link:](#-자바스크립트에서-배열은-객체다)
+  - 📚 배열의 타입 [:link:](#-배열의-타입)
+  - 📚 문자열과 배열 간 변환 [:link:](#-문자열과-배열-간-변환)
+  - 📚 인덱스 연산자 [:link:](#-인덱스-연산자)
+  - 📚 배열의 비구조화 할당 [:link:](#-배열의-비구조화-할당)
+  - 📚 for...in 문 [:link:](#-for-in-문)
+  - 📚 for...of 문 [:link:](#-for-of-문)
+  - 📚 제네릭 방식 타입 [:link:](#-제네릭-방식-타입)
+  - 📚 제네릭 함수의 타입 추론 [:link:](#-제네릭-함수의-타입-추론)
+  - 📚 제네릭 함수의 함수 시그니처 [:link:](#-제네릭-함수의-함수-시그니처)
+  - 📚 전개 연산자 [:link:](#-전개-연산자)
+  - 📚 range 함수 구현 [:link:](#-range-함수-구현)
+- 🦄 선언형 프로그래밍과 배열 [:link:](#-선언형-프로그래밍과-배열)
+  - 📚 명령형 프로그래밍이란? [:link:](#-명령형-프로그래밍이란)
+  - 📚 1부터 100까지 더하기 문제 풀이 [:link:](#-1부터-100까지-더하기-문제-풀이)
+  - 📚 fold: 배열 데이터 접기 [:link:](#-fold-배열-데이터-접기)
+  - 📚 1부터 100까지 홀수의 합 구하기 [:link:](#-1부터-100까지-홀수의-합-구하기)
+  - 📚 filter: 조건에 맞는 아이템만 추려내기 [:link:](#-filter-조건에-맞는-아이템만-추려내기)
+  - 📚 1^2^ + 2^2^ + ... + 100^2^ [:link:](#-1-2-2-2-100-2)
+  - 📚 map: 배열 데이터 가공하기 [:link:](#-map-배열-데이터-가공하기)
+- 🦄 배열의 map, reduce, filter 메서드 [:link:](#-배열의-map-reduce-filter-메서드)
+  - 📚 filter 메서드 [:link:](#-filter-메서드)
+  - 📚 map 메서드 [:link:](#-map-메서드)
+  - 📚 reduce 메서드 [:link:](#-reduce-메서드)
+- 🦄 순수 함수와 배열 [:link:](#-순수-함수와-배열)
+  - 📚 순수 함수란? [:link:](#-순수-함수란)
+  - 📚 타입 수정자 readonly [:link:](#-타입-수정자-readonly)
+  - 📚 불변과 가변 [:link:](#-불변과-가변)
+  - 📚 깊은 복사와 앝은 복사 [:link:](#-깊은-복사와-앝은-복사)
+  - 📚 전개 연산자와 깊은 복사 [:link:](#-전개-연산자와-깊은-복사)
+  - 📚 배열의 sort 메서드를 순수 함수로 구현하기 [:link:](#-배열의-sort-메서드를-순수-함수로-구현하기)
+  - 📚 배열의 filter 메서드와 순수한 삭제 [:link:](#-배열의-filter-메서드와-순수한-삭제)
+  - 📚 가변 인수 함수와 순수 함수 [:link:](#-가변-인수-함수와-순수-함수)
+- 🦄 튜플 이해하기 [:link:](#-튜플-이해하기)
+  - 📚 튜플에서 타입 별칭 사용하기 [:link:](#-튜플에서-타입-별칭-사용하기)
+  - 📚 튜플에 적용하는 비구조화 할당 [:link:](#-튜플에-적용하는-비구조화-할당)
+
+</details>
+
 ## 🦄 배열 이해하기
 - 자바스크립트에서 배열은 `Array` 클래스의 인스턴스이다.
 
@@ -228,6 +271,8 @@ let numbers: number[] = range(1, 10);
 console.log(numbers); // [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 ```
 
+> [🔝위로가기](#-Chapter-5-배열과-튜플)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ## 🦄 선언형 프로그래밍과 배열
 
 ### 📚 명령형 프로그래밍이란?
@@ -389,6 +434,8 @@ let result = fold(
 console.log(result); // 338350
 ```
 
+> [🔝위로가기](#-Chapter-5-배열과-튜플)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ## 🦄 배열의 map, reduce, filter 메서드
 
 ### 📚 filter 메서드
@@ -509,6 +556,9 @@ function forcePure(array: readonly number[]){
 - 이런 변수를 **불변(immutable) 변수**라고 한다.
 - 반면에 `let`이나 `readonly`를 명시하지 않은 변수를 언제든 값을 변경할 수 있다. 이런 변수는 **가변(mutable) 변수**라고 한다.
 
+
+> [🔝위로가기](#-Chapter-5-배열과-튜플)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
+
 ### 📚 깊은 복사와 앝은 복사
 - **순수 함수를 구현할 때는 매개변수가 불변성을 유지해야 하므로**, 매개변수를 가공하려고 할 때 깊은 복사가 실행해 **매개변수값이 변경되지 않게 해야 한다.**
 - 깊은 복사는 대상 변숫값이 바뀔 때 원본 변수값은 그대로인 형태로 동작한다.
@@ -553,6 +603,7 @@ let beforeSort = [6, 2, 9, 0];
 const afterSort = pureSort(beforeSort);
 console.log(beforeSort, afterSort); // [ 6, 2, 9, 0 ] [ 0, 2, 6, 9 ]
 ```
+
 
 ### 📚 배열의 filter 메서드와 순수한 삭제
 - 배열에서 특정 아이템을 삭제할 때는 `splice` 메서드를 사용한다. 그런데 `splice`는 원본 배열의 내용을 변경하므로 순수 함수에서는 사용할 수 없다. 그렇기 때문에 `filter` 메서드를 사용할 수 있다.
@@ -629,6 +680,7 @@ export const mergeArray = <T>(...arrays: readonly T[][]): T[] => {
 }
 ```
 
+
 ## 🦄 튜플 이해하기
 - 자바스크립트에서는 튜플이 없으며 단순히 배열의 한 종류로 취급된다.
 - 다음은 여러 타입에 대응하는 `any` 타입 배열을 선언한 예이다.
@@ -678,3 +730,5 @@ const [result, errorMessage] = doSomething();
 
 console.log(result, errorMessage); // false Some error occurs...
 ```
+
+> [🔝위로가기](#-Chapter-5-배열과-튜플)  |  [🔙메인으로 이동](https://github.com/saseungmin/typescript_programming_study)
