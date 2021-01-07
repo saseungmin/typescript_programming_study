@@ -227,3 +227,164 @@ const range = (from: number, to: number): number[] =>
 let numbers: number[] = range(1, 10);
 console.log(numbers); // [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 ```
+
+## 🦄 선언형 프로그래밍과 배열
+
+### 📚 명령형 프로그래밍이란?
+- 프로그램의 기본 형태는 입력 데이터를 얻고 가공한 다음, 결과를 출력하는 형태로 구성된다.
+
+> 1. 입력 데이터 얻기
+> 2. 입력 데이터 가공해 출력 데이터 생성
+> 3. 출력 데이터 출력
+
+- 반면에 선언형 프로그래밍은 시스템 자원의 효율적인 운용보다는 일괄된 문제 해결 구조에 더 집중한다. 선언형 프로그래밍은 명령형 프로그래밍처럼 `for`문을 사용하지 않고 모두 데이터를 배열에 담고 그 문제가 해결될 때까지 끊임없이 또 다른 형태의 배열로 가공하는 방식으로 구현한다.
+
+> 1. 문제를 푸는 데 필요한 모든 데이터 배열에 저장
+> 2. 입력 데이터 배열을 가공해 출력 데이터 배열 생성
+> 3. 출력 데이터 배열에 담긴 아이템 출력
+
+
+### 📚 1부터 100까지 더하기 문제 풀이
+- 아래 구조는 명령형 프로그래밍 방식이다.
+
+```ts
+let sum = 0;
+for(let val = 1; val <= 100;)
+  sum += val++;
+console.log(sum); // 5050
+```
+
+- 다음 코드는 선언형으로 구현한 것이다.
+- 명령어 코드는 데이터와 가공이 `for` 문 안에서 이루어졌지만, **선언형은 데이터 생성과 가공 과정을 분리한다.**
+
+```ts
+import { range } from "./range";
+
+let numbers: number[] = range(1, 100 + 1);
+console.log(numbers); // [1, 2, ..., 100]
+```
+
+### 📚 fold: 배열 데이터 접기
+- 폴드는 `[1, 2, 3, ...]` 형태의 배열 데이터를 가공해 `5050`과 같은 하나의 값을 생성하려고 할 때 사용한다.
+- 폴드 함수는 `T[]` 타입 배열을 가공해 `T` 타입의 결과를 만들어 준다.
+
+```ts
+export const fold = <T>(array: T[], callback: (result: T, val: T) => T, initValue: T) => {
+  let result: T = initValue;
+
+  for (let i = 0; i < array.length; ++i) {
+    const value = array[i];
+    result = callback(result, value);
+  }
+  
+  return result;
+}
+```
+
+- 다음은 `fold` 함수를 사용해 선언형 프로그래밍 방식으로 1부터 100까지 더하는 코드를 구현한 것이다.
+
+```ts
+import { range } from "./range";
+import { fold } from './fold';
+
+// 입력 데이터 생성
+let numbers: number[] = range(1, 100 + 1);
+
+// 입력 데이터 가공
+let result = fold(numbers, (result, value) => result + value, 0);
+console.log(result); // 5050
+```
+
+- 명령형 방식은 시스템 자원의 효율을 최우선으로 생각하지만, 선언형 방식은 폴드처럼 범용으로 구현된 함수를 재사용하면서 문제를 해결한다.
+
+### 📚 1부터 100까지 훌수의 합 구하기
+- 다음은 명령형 방식으로 구현한 코드이다.
+
+```ts
+let oddSum = 0;
+for (let val = 1; val <= 100; val += 2) {
+  oddSum += val;
+}
+
+console.log(oddSum); // 2500
+```
+
+### 📚 filter: 조건에 맞는 아이템만 추려내기
+- 함수형 프로그래밍에서 흔히 보는 `filter`라는 이름의 함수는 입력 배열을 가공해 조건에 맞는 값만 추려내는 기능을 한다.
+- `filter` 함수를 구현한 예이다.
+
+```ts
+export const filter = <T>(array: T[], callback: (value: T, index?: number) => boolean): T[] => {
+  let result: T[] = [];
+
+  for (let index: number = 0; index < array.length; ++index) {
+    const value = array[index];
+    
+    if(callback(value, index)) {
+      result = [...result, value];
+    }
+
+    return result;
+  }
+}
+```
+
+- `filter`를 사용해 구현한다.
+
+```ts
+import { range } from "./range";
+import { fold } from './fold';
+import { filter } from './filter';
+
+let numbers: number[] = range(1, 100 + 1);
+
+const isOdd = (n: number): boolean => n % 2 !== 0;
+let result = fold(filter(numbers, isOdd), (result, value) => result + value, 0);
+
+console.log(result); // 2500
+```
+
+### 📚 1^2^ + 2^2^ + ... + 100^2^
+- 명령형 방식으로 구현한 것이다.
+
+```ts
+let squareSum = 0;
+for (let val = 1; val <= 100; ++val ) {
+  squareSum += val * val;
+}
+console.log(squareSum);
+```
+- 선언형 방식으로 입력 데이터를 이와 같이 구현하려면 `map`이라는 함수가 필요하다.
+
+### 📚 map: 배열 데이터 가공하기
+- 변수 `x`와 `y`의 타입까지 생각하면 `map`은 `x: T -> y: Q` 처럼 입력과 출력의 변수의 타입이 서로 다를 수 있음을 고려해야 한다.
+
+```ts
+export const map = <T, Q>(array: T[], callback: (value: T, index?: number) => Q): Q[] => {
+  let result: Q[] = [];
+
+  for(let index = 0; index < array.length; ++index) {
+    const value = array[index];
+    result = [...result, callback(value, index)];
+  }
+  
+  return result;
+}
+```
+
+- 이제 `map` 함수를 이용하면 선언형 방식의 코드로 작성할 수 있다.
+
+```ts
+import { range } from "./range";
+import { fold } from './fold';
+import { map } from './map';
+
+let numbers: number[] = range(1, 100 + 1);
+let result = fold(
+  map(numbers, value => value * value),
+  (result, value) => result + value, 
+  0
+)
+
+console.log(result); // 338350
+```
