@@ -389,7 +389,7 @@ let result = fold(filter(numbers, isOdd), (result, value) => result + value, 0);
 console.log(result); // 2500
 ```
 
-### 📚 1^2^ + 2^2^ + ... + 100^2^
+### 📚 1<sup>2</sup> + 2<sup>2</sup> + ... + 100<sup>2</sup>
 - 명령형 방식으로 구현한 것이다.
 
 ```ts
@@ -530,7 +530,7 @@ function impure1(array: number[]): void {
 }
 ```
 
-- 다음 `impure2` 함수는 `g`라는 외부 변수를 사용ㅎ므로 불순 함수이다.
+- 다음 `impure2` 함수는 `g`라는 외부 변수를 사용하므로 불순 함수이다.
 
 ```ts
 let g = 10;
