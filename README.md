@@ -7,6 +7,7 @@
 ### 🎯 진행방법
 - 책을 읽고 정리는 마크다운 형식으로 정리한다.
 - 예제들을 따라해보며 진행한다.
+- [스터디](https://github.com/Fortuna-Study/learning-typescript)를 통해 진행한다.
 
 ### 📚 책 목차
 
@@ -19,3 +20,5 @@
 #### [🎈 Chapter 4: 함수와 메서드](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%204)
 
 #### [🎈 Chapter 5: 배열과 튜플](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%205)
+
+#### [🎈 Chapter 6: 반복기와 생성기](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%206)
