@@ -22,3 +22,5 @@
 #### [🎈 Chapter 5: 배열과 튜플](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%205)
 
 #### [🎈 Chapter 6: 반복기와 생성기](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%206)
+
+#### [🎈 Chapter 7: Promise와 async/await 구문](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%207)
