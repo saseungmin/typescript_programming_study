@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src",
+    "dev": "ts-node src/ap-test3.ts",
     "build": "tsc && node dist"
   },
   "keywords": [],
