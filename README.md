@@ -28,3 +28,5 @@
 #### [🎈 Chapter 8: 함수 조합의 원리와 응용](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%208)
 
 #### [🎈 Chapter 9: 람다 라이브러리](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%209)
+
+#### [🎈 Chapter 10: 제네릭 프로그래밍](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%2010)
