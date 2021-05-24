@@ -374,3 +374,177 @@ console.log(
     .value()[0] === jack.value()[0] // true
 );
 ```
+
+## 📚 Maybe 모나드 이해와 구현
+
+### 🎈 Maybe 모나드란?
+- Maybe는 오류일 때와 정상적일 때를 모두 고려하면서도 사용하는 쪽 코드를 간결하게 작성할 수 있게 해준다.
+- Maybe 모나드는 10장의 `Option`의 `Some`, `None`과 비슷한 의미를 가진 `Just`와 `Nothing`이라는 두 가지 타입을 제공한다.
+- `Maybe`는 그 자체가 모나드가 아니라, `Maybe`가 제공하는 `Just<T>`와 `Nothing`타입이 모나드이다.
+
+```ts
+export class Maybe<T> {
+  static Just<U>(value: U) {
+    return new Just<U>(value);
+  }
+  static Nothing = new Nothing;
+}
+```
+
+- `Maybe`의 이런 설계 목적은 코드의 안정성을 함수형 방식으로 보장하기 위해서이다.
+- 코드에 적용되는 값에 따라 어떤 때는 정상적이고 어떤 때는 `undefined`, `null`, `Infinity` 등의 값을 유발할 때 `Maybe`를 사용하면 매우 효율적인 방식으로 코드를 작성할 수 있다.
+
+### 🎈 Maybe가 함수의 반환 타입일 때의 문제점
+- 현재 타입스크립트는 `Just<number> | Nothing`과 같은 두 클래스의 합집합 타입을 만나면 오류가 발생한다.
+- 타입스크립트의 이러한 특성 때문에 `Maybe` 클래스는 다음 `_IMaybe` 인터페이스와 `IMonad` 인터페이스를 합해 놓은 `IMaybe` 타입을 제공한다.
+
+```ts
+export interface _IMaybe<T> {
+  isJust(): boolean;
+  isNothing(): boolean;
+  getOrElse(defaultValue: T): T;
+};
+```
+
+### 🎈 Just 모나드 구현
+- `Identity`모나드와 달리 `ISetoid`인터페이스를 구현하지 않는데, 이는 `Just`가 `Nothing`일 때를 고려해 `value()`가 아닌 `getOrElse(0)`과 같은 형태로 동작하는 것을 염두해 둔 것이다.
+
+```ts
+import { _IMaybe } from './_IMaybe';
+import { IMonad } from '../interfaces/IMonad';
+
+export class Just<T> implements _IMaybe<T>, IMonad<T> {
+  constructor(private _value: T) {}
+  value(): T { return this._value; }
+
+  // IApplicative
+  static of<T>(value: T): Just<T> {
+    return new Just<T>(value);
+  }
+
+  // IMaybe
+  isJust() { return true }
+  isNothing() { return false }
+  getOrElse<U>(defaultValue: U) { return this.value() }
+
+  // IFunctor
+  map<U, V>(fn: (x: T) => U): Just<U> {
+    return new Just<U>(fn(this.value()));
+  }
+
+  // IApply
+  ap<U>(b: U) {
+    const f = this.value();
+    if (f instanceof Function) {
+      return Just.of<U>((f as Function)(b))
+    }
+  }
+  
+  // IChain
+  chain<U>(fn: (T) => U): U {
+    return fn(this.value());
+  }
+}
+```
+
+### 🎈 Nothing 모나드 구현
+- `Nothing` 모나드는 `Just` 모나드와 달리 코드를 완벽하게 실행시키지 않는 것이 설계 목적이다.
+
+```ts
+import { _IMaybe } from './_IMaybe';
+import { IMonad } from '../interfaces/IMonad';
+
+export class Nothing implements _IMaybe<null>, IMonad<null> {
+  // IApplicative
+  static of<T>(value: T = null): Nothing { return new Nothing; }
+
+  // IMaybe
+  isJust() { return false; }
+  isNothing() { return true; }
+  getOrElse<U>(defaultValue: U) { return defaultValue; }
+
+  // IFunctor
+  map<U, V>(fn: (x) => U): Nothing { return new Nothing }
+
+  // IApply
+  ap<U>(b: U) {
+    return new Nothing;
+  }
+
+  // IChain
+  chain<U>(fn: (T) => U): Nothing { return new Nothing; }
+}
+```
+
+### 🎈 Just와 Nothing 모나드 단위 테스트
+- 다음 테스트 코드는 `Just`가 `Identity`처럼 정상적인 모나드로 동작하면서 `_IMaybe` 인터페이스 기능을 추가로 제공하는 것을 보여준다.
+
+```ts
+import * as R from 'ramda';
+
+import { Just } from '../classes/Just';
+
+console.log(
+  Just.of(100).isJust(), // true
+  Just.of(100).isNothing(), // false
+  Just.of(100).getOrElse(1), // 100
+  Just.of(100).map(R.identity).getOrElse(1), // 100
+  Just.of(R.identity).ap(100).getOrElse(1), // 100
+  Just.of(100).chain(Just.of).getOrElse(1), // 100
+);
+```
+
+- `Nothing` 모나드는 `Just`와 달리 자신의 모나드 관련 코드를 동작시키지 말아야 한다.
+- 또한, `undefined`나  `null`, `NaN`, `Infinity`와 같은 값을 반환해서도 안 된다.
+
+```ts
+import { Nothing } from '../classes/Nothing';
+import { Just } from '../classes/Just';
+
+console.log(
+  Nothing.of().isJust(), // false
+  Nothing.of().isNothing(), // true
+  Nothing.of().getOrElse(1), // 1
+  Nothing.of().map((x) => x + 1).getOrElse(1), // 1
+  Nothing.of().ap(1).getOrElse(1), // 1
+  Nothing.of().chain(Just.of).getOrElse(1), // 1
+);
+```
+
+### 🎈 Maybe 테스트
+- 전체적인 예제 내용은 책 또는 코드 참고 (P.318 ~ P.319)
+- 다음 `getJokeAsMaybe` 함수는 정상적인 데이터는 `Maybe.Just`로 처리하고, 오류가 발생하면 `reject` 함수를 호출하지 않고 `Maybe.Nothing`을 반환한다.
+
+```ts
+import * as R from 'ramda';
+
+import { JokeType, getRandomJoke } from './getRandomJoke';
+import { IMaybe, Maybe } from './classes/Maybe';
+
+const _getJokeAsMaybe = async() => {
+  const jockItem: JokeType = await getRandomJoke();
+  const jock = R.view(R.lensProp('joke'), jockItem);
+  return jock;
+}
+
+export const getJokeAsMaybe = () => new Promise<IMaybe<string>>((resolve, reject) => {
+  _getJokeAsMaybe()
+    .then((jock: string) => resolve(Maybe.Just(jock)))
+    .catch(e => resolve(Maybe.Nothing)); // reject가 아닌 resolve
+});
+
+export { IMaybe, Maybe };
+```
+
+- `getJokeAsMaybe`는 에러가 발생하면 `reject` 호출 대신 `Maybe.Nothing`을 반환하므로 다음 테스트 코드는 `catch`문이 없어 간결하다.
+
+```ts
+import { getJokeAsMaybe, IMaybe } from '../getJokeAsMaybe';
+
+(async() => {
+  const joke: IMaybe<string> = await getJokeAsMaybe();
+  console.log(joke.getOrElse('something wrong'));
+})();
+```
+
+- `Maybe`는 이처럼 오류일 때와 정상일 떄를 모두 고려하면서도 사용하는 쪽 코드를 매우 간결하게 작성할 수 있게 해준다.
