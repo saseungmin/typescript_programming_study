@@ -1,5 +1,7 @@
 ## 🐤 Do It! 타입스크립트 프로그래밍
 
+**📌 다른 책 정리 보러가기** [:link:](https://github.com/saseungmin/reading_books_record_repository)   
+
 ### ✌️ 책 정보
 - [Do It! 타입스크립트 프로그래밍](http://www.yes24.com/Product/Goods/89328106?OzSrank=1)
 - 저자: 전예홍
