@@ -375,9 +375,9 @@ console.log(
 );
 ```
 
-## 📚 Maybe 모나드 이해와 구현
+## 🦄 Maybe 모나드 이해와 구현
 
-### 🎈 Maybe 모나드란?
+### 📚 Maybe 모나드란?
 - Maybe는 오류일 때와 정상적일 때를 모두 고려하면서도 사용하는 쪽 코드를 간결하게 작성할 수 있게 해준다.
 - Maybe 모나드는 10장의 `Option`의 `Some`, `None`과 비슷한 의미를 가진 `Just`와 `Nothing`이라는 두 가지 타입을 제공한다.
 - `Maybe`는 그 자체가 모나드가 아니라, `Maybe`가 제공하는 `Just<T>`와 `Nothing`타입이 모나드이다.
@@ -394,7 +394,7 @@ export class Maybe<T> {
 - `Maybe`의 이런 설계 목적은 코드의 안정성을 함수형 방식으로 보장하기 위해서이다.
 - 코드에 적용되는 값에 따라 어떤 때는 정상적이고 어떤 때는 `undefined`, `null`, `Infinity` 등의 값을 유발할 때 `Maybe`를 사용하면 매우 효율적인 방식으로 코드를 작성할 수 있다.
 
-### 🎈 Maybe가 함수의 반환 타입일 때의 문제점
+### 📚 Maybe가 함수의 반환 타입일 때의 문제점
 - 현재 타입스크립트는 `Just<number> | Nothing`과 같은 두 클래스의 합집합 타입을 만나면 오류가 발생한다.
 - 타입스크립트의 이러한 특성 때문에 `Maybe` 클래스는 다음 `_IMaybe` 인터페이스와 `IMonad` 인터페이스를 합해 놓은 `IMaybe` 타입을 제공한다.
 
@@ -406,7 +406,7 @@ export interface _IMaybe<T> {
 };
 ```
 
-### 🎈 Just 모나드 구현
+### 📚 Just 모나드 구현
 - `Identity`모나드와 달리 `ISetoid`인터페이스를 구현하지 않는데, 이는 `Just`가 `Nothing`일 때를 고려해 `value()`가 아닌 `getOrElse(0)`과 같은 형태로 동작하는 것을 염두해 둔 것이다.
 
 ```ts
@@ -447,7 +447,7 @@ export class Just<T> implements _IMaybe<T>, IMonad<T> {
 }
 ```
 
-### 🎈 Nothing 모나드 구현
+### 📚 Nothing 모나드 구현
 - `Nothing` 모나드는 `Just` 모나드와 달리 코드를 완벽하게 실행시키지 않는 것이 설계 목적이다.
 
 ```ts
@@ -476,7 +476,7 @@ export class Nothing implements _IMaybe<null>, IMonad<null> {
 }
 ```
 
-### 🎈 Just와 Nothing 모나드 단위 테스트
+### 📚 Just와 Nothing 모나드 단위 테스트
 - 다음 테스트 코드는 `Just`가 `Identity`처럼 정상적인 모나드로 동작하면서 `_IMaybe` 인터페이스 기능을 추가로 제공하는 것을 보여준다.
 
 ```ts
@@ -511,7 +511,7 @@ console.log(
 );
 ```
 
-### 🎈 Maybe 테스트
+### 📚 Maybe 테스트
 - 전체적인 예제 내용은 책 또는 코드 참고 (P.318 ~ P.319)
 - 다음 `getJokeAsMaybe` 함수는 정상적인 데이터는 `Maybe.Just`로 처리하고, 오류가 발생하면 `reject` 함수를 호출하지 않고 `Maybe.Nothing`을 반환한다.
 
@@ -548,3 +548,248 @@ import { getJokeAsMaybe, IMaybe } from '../getJokeAsMaybe';
 ```
 
 - `Maybe`는 이처럼 오류일 때와 정상일 떄를 모두 고려하면서도 사용하는 쪽 코드를 매우 간결하게 작성할 수 있게 해준다.
+
+## 🦄 Validation 모나드 이해와 구현
+
+### 📚 Validation 모나드란?
+- 데이터는 있는데 그 데이터가 유효한지를 판단하는 용도로 설계된 모나드가 `Validation`이다.
+- `Validation` 모나드는 판타지랜드의 어플라이 규격에 의존해 동작한다.
+- `Validation` 클래스는 `Maybe`와 비슷하게 `Success`와 `Failure` 두 가지 모나드로 구성된다.
+- `Success`와 `Failure` 모나드는 기본적으로 `Identity` 모나드의 `ap` 메서드 방식으로 동작한다. `ap` 메서드를 사용할ㄷ 때는 `Identity` 모나드의 `value`가 함수여야 한다.
+
+```ts
+import { Identity } from '../classes/Identity';
+
+const add = (a: number) => (b: number) => a + b;
+
+console.log(
+  add(1)(2),  // 3
+  Identity.of(add).ap(1).ap(2).value(), // 3
+);
+```
+
+### 📚 Validation 클래스 구조
+- `Validation` 클래스는 `Maybe`와 비슷하게 `Success`와 `Failure` 두 가지 모나드로 구성된다.
+
+```ts
+import { Success } from './Success';
+import { Failure } from './Failure';
+
+export class Validation {
+  static Success = Success;
+  static Failure = Failure;
+  static of<T>(fn: T): Success<T> {
+    return this.Success.of<T>(fn);
+  }
+}
+
+export { Success, Failure };
+```
+
+- `Success`와 `Failure` 모나드는 다음 인터페이스를 구현하고 있다.
+
+```ts
+export interface IValidation<T> {
+  isSuccess: boolean;
+  isFailure: boolean;
+};
+```
+
+### 📚 Success 모나드 구현
+- `Success` 모나드는 `IChain` 형태로는 동작하지 않으므로 `IFunctor`와 `IApply`, `IApplicative`만 구현한다.
+- 그리고 다른 메서드들과 달리 `ap` 메서드는 매개변수가 `Failure` 인지에 따라 조금 다르게 동작한다.
+
+```ts
+import { IApply } from '../interfaces/IApply';
+import { IFunctor } from '../interfaces/IFunctor';
+import { IValidation } from '../interfaces/IValidation';
+
+export class Success<T> implements IValidation<T>, IFunctor<T>, IApply<T> {
+  constructor(public value: T, public isSuccess = true, public isFailure = false) {}
+
+  // IApplicative
+  static of<U>(value: U): Success<U> {
+    return new Success<U>(value);
+  }
+
+  // IFunctor
+  map<U>(fn: (x: T) => U) {
+    return new Success<U>(fn(this.value));
+  }
+
+  // IApply
+  ap(b) {
+    return b.isFailure ? b : b.map(this.value);
+  }
+}
+```
+
+- `Success` 클래스의 `value`는 현재 함수다.
+- 다음 테스트 코드를 실행해 보면, `checkSuccess` 2차 고차 함수가 최종적으로 `boolean` 타입의 값을 반환하므로 최종 `Success` 객체의 `value`값은 `true`이다.
+
+```ts
+import { Success } from '../classes/Success';
+
+const checkSuccess = <T>(a: Success<T>) => (b: Success<T>): boolean =>
+  [a, b].filter(({ isFailure }) => isFailure === true).length === 0;
+
+console.log(
+  Success.of(checkSuccess)
+    .ap(Success.of(1))
+    .ap(Success.of(2))
+);
+// Success { value: true, isSuccess: true, isFailure: false }
+```
+
+### 📚 Failure 모나드 구현
+- `Failure` 모나드는 최종적으로 시래한 원인을 문자열 배열로 저장한다.
+
+```ts
+import { IApply } from '../interfaces/IApply';
+import { IFunctor } from '../interfaces/IFunctor';
+import { IValidation } from '../interfaces/IValidation';
+
+export class Failure<T> implements IValidation<T>, IFunctor<T>, IApply<T> {
+  constructor(public value: T[], public isSuccess = false, public isFailure = true) {}
+
+  // IApplicative
+  static of<U>(value: U[]): Failure<U> {
+    return new Failure<U>(value);
+  }
+
+  // IFunctor
+  map(fn) {
+    return new Failure<T>(fn(this.value));
+  }
+
+  // IApply
+  ap(b) {
+    return b.isFailure ? new Failure<T>([...this.value, ...b.value]) : this;
+  }
+}
+```
+
+### 📚 비밀번호 검증 기능 구현
+
+- 비밀번호 검증에 `password`라는 속성이 있어야 하고, 이 속성에 `string` 타입의 값이 들어 있어야 한다.
+
+```ts
+import { Failure } from '../classes/Failure';
+import { Success } from '../classes/Success';
+
+export const checkNull = <S, F>(o: { password?: string }) => {
+  const { password } = o;
+
+  return (password === undefined || typeof password !== 'string') ?
+    new Failure(['Password can not be null']) : new Success(o);
+};
+```
+
+- 문자열 길이가 최소 6자 이상이어야 한다는 등 검증은 다음 `checkLength` 함수로 구현한다.
+
+```ts
+import { Failure } from '../classes/Failure';
+import { Success } from '../classes/Success';
+
+export const checkLength = (o: { password?: string }, minLength: number = 6) => {
+  const { password } = o;
+
+  return (!password || password.length < minLength) ?
+    new Failure(['Password must have more than 6 characters']) : new Success(o);
+};
+```
+
+- 다음 코드에서 `checkPassword` 함수는 이러한 내용을 구현한 예이다.
+
+```ts
+import { Validation } from './classes/Validation';
+import { checkNull } from './utils/checkNull';
+import { checkLength } from './utils/checkLength';
+
+export const checkPassword = (o): [object, string[]] => {
+  const result = Validation.of(a => b => o)
+    .ap(checkNull(o))
+    .ap(checkLength(o));
+
+  return result.isSuccess ? [result.value, undefined] : [undefined, result.value];
+};
+```
+
+- 다음은 `checkPassword` 함수를 테스트하는 코드이다.
+
+```ts
+import { checkPassword } from '../checkPassword';
+
+[
+  { password: '123456' },
+  { password: '1234' },
+  {},
+  { pa: '123456' },
+]
+  .forEach((target, index) => {
+    const [ value, failureReason ] = checkPassword(target);
+
+    if (failureReason) {
+      console.log(index, 'validation fail.', JSON.stringify(failureReason));
+    } else {
+      console.log(index, 'validation ok.', JSON.stringify(value));
+    }
+  });
+
+// 0 validation ok. {"password":"123456"}
+// 1 validation fail. ["Password must have more than 6 characters"]
+// 2 validation fail. ["Password can not be null","Password must have more than 6 characters"]
+// 3 validation fail. ["Password can not be null","Password must have more than 6 characters"]
+```
+
+### 📚 이메일 주소 검증 기능 구현
+- 정규식을 사용한 유횽성 검증 판별
+
+```ts
+import { Success } from '../classes/Success';
+import { Failure } from '../classes/Failure';
+
+export const checkEmailAddress = (o: { email?: string }) => {
+  const { email } = o;
+
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
+  return re.test(email) ? new Success(email) : new Failure(['invalid email address']);
+};
+```
+
+- 다음 `checkEmail` 함수는 `checkEmailAddress` 유틸리티 함수를 사용해 데이터 유효성을 판별하는 내용이다.
+
+```ts
+import { Validation } from './classes/Validation';
+import { checkEmailAddress } from './utils/checkEmailAddress';
+
+export const checkEmail = (o): [object, string[]] => {
+  const result = Validation.of(a => o)
+    .ap(checkEmailAddress(o));
+
+  return result.isSuccess ? [result.value, undefined] : [undefined, result.value];
+};
+```
+
+- 다음은 테스트 코드이다.
+
+```ts
+import { checkEmail } from '../checkEmail';
+
+[
+  { email: 'abc@efg.com' },
+  { email: 'abcefg' },
+].forEach((target, index) => {
+  const [ value, failureReason ] = checkEmail(target);
+
+  if (failureReason) {
+    console.log(index, 'validation fail.', JSON.stringify(failureReason));
+  } else {
+    console.log(index, 'validation ok.', JSON.stringify(value));
+  }
+});
+
+// 0 validation ok. {"email":"abc@efg.com"}
+// 1 validation fail. ["invalid email address"]
+```

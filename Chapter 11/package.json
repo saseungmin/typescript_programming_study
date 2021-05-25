@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/test/getJokeAsMaybe-test.ts",
+    "dev": "ts-node src/test/checkEmail-test.ts",
     "build": "tsc && node dist"
   },
   "keywords": [],
