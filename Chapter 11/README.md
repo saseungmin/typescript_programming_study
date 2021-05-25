@@ -793,3 +793,184 @@ import { checkEmail } from '../checkEmail';
 // 0 validation ok. {"email":"abc@efg.com"}
 // 1 validation fail. ["invalid email address"]
 ```
+
+## 🦄 IO 모나드 이해와 구현
+
+### 📚 IO 모나드란?
+- `Promise` 타입 객체는 생성할 때 넘겨주는 콜백 함수가 `then` 메서드를 호출해야 비로소 동작하는데, 이번 절에서 설명하는 IO 모나드도 이런 방식으로 동작한다.
+
+```ts
+import { IO } from './classes/IO';
+
+const work = () => {
+  console.log('work called...');
+  return { name: 'Jack', age: 32 };
+}
+
+const result = IO.of(work).runIO(); // runIO 메서드가 호출되면 그때 동작한다.
+console.log(result); // { name: 'Jack', age: 32 }
+```
+
+### 📚 왜 모나드 이름이 IO인가?
+- IO 모나드는 여러 개의 파일 입출력을 선언형 프로그래밍 방식으로 작성할 수 있게 고안되었다.
+- `runIO` 메서드가 호출되어야 비로소 동작하기 시작한다.
+
+```ts
+import * as fs from 'fs';
+import * as R from 'ramda';
+
+const work1 = () => fs.readFileSync('package.json');
+const work2 = (json1) => () => {
+  const json2 = fs.readFileSync('tsconfig.json');
+  return [json1, json2];
+};
+
+const result = IO.of(work1)
+  .chain(json1 => IO.of(work2(json1)))
+  .map(R.map(JSON.parse))
+  .map(R.reduce((result: object, obj: object) => ({ ...result, ...obj }), {}))
+  .runIO()
+
+console.log(result); // package.json과 tsconfig.json 파일 내용 출력
+```
+
+### 📚 IO 모나드를 사용할 때 주의할 점
+- 함수형 프로그래밍을 할 때 함수가 순수 함수여야 한다. 그런데 비동기 입출력, 프로미스, 생성기 등은 부수효과를 발생하는 함수를 만들어 버린다.
+- 그래서 위 예제에서도 동기 버전인 `readFileSync` 함수를 사용했다.
+
+### 📚 runIO 메서드 이해하기
+- IO 모나드의 `runIO` 메서드는 다음 코드처럼 여러 개의 매개변수를 사용해 동작시킬 수 있다.
+
+```ts
+export interface IRunIO {
+  runIO<R>(...args: any[]): R;
+};
+```
+
+### 📚 IO 모나드 구현
+- `IO` 모나드 구현 코드에서는 `IApply` 메서드를 구현하지 안흔다.
+- `IO` 모나드의 `map` 메서드는 `runIO`가 호출되기 전까지는 동작하지 말아야 한다.
+- 이에 따라 다른 모나드와 다르게 입력받은 콜백 함수를 `pipe`를 사용해 조합하는 방식으로 구현해야 한다.
+
+```ts
+import { IRunIO } from '../interfaces/IRunIO';
+import { IFunctor } from '../interfaces/IFunctor';
+
+const pipe = (...funcs) => (arg) => funcs.reduce((value, fn) => fn(value), arg);
+
+export class IO implements IRunIO, IFunctor<Function> {
+  constructor(public fn: Function) {}
+
+  static of(fn: Function) { return new IO(fn); }
+
+  // IRunIO
+  runIO<T>(...args: any[]): T {
+    return this.fn(...args) as T;
+  }
+
+  // IFunctor
+  map(fn: Function): IO {
+    const f: Function = pipe(this.fn, fn);
+
+    return IO.of(f);
+  }
+
+  // IChain
+  chain(fn) {
+    const that = this;
+
+    return IO.of((value) => {
+      const io = fn(that.fn(value));
+      
+      return io.fn();
+    });
+  }
+}
+```
+
+- `chain` 메서드는 타입 주석을 달면 코드가 컴파일되지 않는다. 이 코드는 자바스크립트처럼 접근해야 동작한다.
+- `chain`에 입력되는 콜백 함수 `fn`은 `IO`타입 객체를 반환한다. `fn` 호출의 반환값은 `IO` 타입 객체이다. 또한, 이 `IO` 타입 객체에 저장되는 함수 또한 `IO` 타입 객체를 반환하는 형태로 구현되었으므로 `io.fn()` 함수를 호출해 `chain` 메서드가 또 다른 `IO` 타입 객체를 반환하도록 구현되어 있다.
+
+### 📚 앞 메서드들의 반환값 얻기
+- `IO` 모나드는 시작할 때의 콜백 함수가 `runIO` 호출 때 전달한 매개변수를 받는 방법과 그 이후의 `map` 혹은 `chain` 메서드가 앞 작업의 결괏값을 받는 형태가 다르다.
+
+```ts
+import { IO } from '../classes/IO';
+
+const result = IO.of((a1) => {
+  console.log('io started', a1);
+  return a1;
+})
+.runIO(1); // runIO가 전달해 준 시작값
+
+console.log(result);
+// io started 1
+// 1
+```
+
+- 다음 코드에서 `IO` 객체의 콜ㄹ백 함수는 `a1` 변숫값을 반환하는데, `map` 메서드는 이 값을 다른 모나드에서 봤던 것과 똑같은 방식으로 얻는다.
+
+```ts
+import { IO } from '../classes/IO';
+
+const result = IO.of((a1) => {
+  console.log('io started', a1);
+  return a1;
+})
+.map((a2) => {
+  console.log('first map called', a2);
+  return a2 + 1;
+})
+.runIO(1);
+
+console.log(result);
+// io started 1
+// first map called 1
+// 2
+```
+
+- 그러나 `chain` 메서드일 때는 IO 모나드를 반환해야 하므로 다음과 같은 코드가 된다.
+
+```ts
+import { IO } from '../classes/IO';
+
+const result = IO.of((a1) => {
+  console.log('io started', a1);
+  return a1;
+})
+.chain((a2) => {
+  return IO.of(() => {
+    console.log('first chain called', a2);
+    return a2 + 1;
+  })
+})
+.runIO(1);
+
+console.log(result);
+// io started 1
+// first chain called 1
+// 2
+```
+
+- 결론적으로 `chain` 메서드에서 앞 작업의 결과를 얻으려면 다음 코드처럼 마치 2차 고차 함수 형태로 보이는 방식으로 구현해야 한다.
+
+```ts
+import { IO } from '../classes/IO';
+
+const chainCB = a2 => IO.of(() => {
+  console.log('first chain called');
+  return a2 + 1;
+});
+
+const result = IO.of((a1) => {
+  console.log('io started', a1);
+  return a1;
+})
+.chain(chainCB)
+.runIO(1);
+
+console.log(result);
+// io started 1
+// first chain called 1
+// 2
+```
