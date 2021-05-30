@@ -34,3 +34,5 @@
 #### [🎈 Chapter 10: 제네릭 프로그래밍](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%2010)
 
 #### [🎈 Chapter 11: 모나드](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%2011)
+
+#### [🎈 Chapter 12: 타입스크립트 함수형 프로그래밍 실습](https://github.com/saseungmin/typescript_programming_study/tree/master/Chapter%2012)
