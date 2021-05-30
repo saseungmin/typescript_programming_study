@@ -1,0 +1,517 @@
+# 🐤 Chapter 12: 타입스크립트 함수형 프로그래밍 실습
+
+## 🦄 빅데이터 배치 프로그램 만들기
+- 실습에 대한 내용이므로 자세한 내용은 책을 참고(P.340 ~ P.365)
+
+### 📚 노드제이에스에서 프로그램 명령 줄 인수 읽기
+
+```ts
+export type FileNameAndNumber = [string, number];
+
+export const getFileNameAndNumber = (
+  defaultFilename: string,
+  defaultNumberOfFakeData: number,
+): FileNameAndNumber => {
+  const [bin, node, filename, numberOfFakeData] = process.argv;
+
+  return [
+    filename || defaultFilename,
+    numberOfFakeData ? parseInt(numberOfFakeData, 10) : defaultNumberOfFakeData,
+  ];
+};
+```
+
+### 📚 파일 처리 비동기 함수를 프로미스로 구현하가
+
+#### 🎈 fs.access API로 디렉터리나 파일 확인하기
+- 코드를 작성하다 보면 파일이나 디렉터리가 현재 있는지 없는지를 확인해야 할 떄가 생긴다.
+
+```ts
+import * as fs from 'fs';
+
+export const fileExist = (
+  filepath: string,
+): Promise<boolean> => new Promise((resolve) => fs.access(filepath, (error) => resolve(!error)));
+```
+
+- `fileExists-test.ts`
+
+```ts
+import { fileExist } from '../fileApi/fileExists';
+
+const exists = async (filepath) => {
+  const result = await fileExist(filepath);
+  console.log(`${filepath} ${result ? 'exists' : 'not exists'}`);
+};
+
+exists('./package.json');
+exists('./package');
+```
+
+#### 🎈 mkdirp 패키지로 디렉터리 생성 함수 만들기
+
+```ts
+import mkdirp from 'mkdirp';
+
+import { fileExist } from './fileExists';
+
+export const mkdir = (dirname: string): Promise<string> => new Promise(async (resolve, reject) => {
+  const alreadyExists = await fileExist(dirname);
+
+  if (alreadyExists) {
+    resolve(dirname);
+    return;
+  }
+
+  mkdirp(dirname)
+    .then(() => resolve(dirname))
+    .catch((error) => reject(error));
+});
+```
+
+#### 🎈 rimraf 패키지로 디렉터리 삭제 함수 만들기
+
+```ts
+import rimraf from 'rimraf';
+
+import { fileExist } from './fileExists';
+
+export const rmdir = (dirname: string): Promise<string> => new Promise(async (resolve, reject) => {
+  const alreadyExists = await fileExist(dirname);
+
+  if (!alreadyExists) {
+    resolve(dirname);
+    return;
+  }
+
+  rimraf(dirname, (error) => (error ? reject(error) : resolve(dirname)));
+});
+```
+
+#### 🎈 fs.writeFile API로 파일 생성하기
+- 노드제이에스 환경에서 파일의 데이터를 읽거나 쓸 때는 대부분 텍스트 데이터를 대상으로 한다.
+- 이때 텍스트 데이터는 유니코드로 처리해야 한다.
+
+```ts
+import * as fs from 'fs';
+
+export const writeFile = (
+  filename: string, data: any,
+): Promise<any> => new Promise((resolve, reject) => {
+  fs.writeFile(filename, data, 'utf8', (error: Error) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+
+    resolve(data);
+  });
+});
+```
+
+- `writeFile-test.ts`
+
+```ts
+import { writeFile } from '../fileApi/writeFile';
+import { mkdir } from '../fileApi/mkdir';
+
+const writeTest = async (filename: string, data: any) => {
+  const result = await writeFile(filename, data);
+  console.log(`write ${result} to ${filename}`);
+};
+
+mkdir('./data')
+  .then(() => writeTest('./data/hello.txt', 'hello world'))
+  .then(() => writeTest('./data/test.json', JSON.stringify({ name: 'Jack', age: 32 }, null, 2)))
+  .catch((e: Error) => console.log(e.message))
+```
+
+#### 🎈 fs.readFile API로 파일 내용 읽기
+
+```ts
+import * as fs from 'fs';
+
+export const readFile = (filename: string): Promise<any> => new Promise<any>((resolve, reject) => {
+  fs.readFile(filename, 'utf8', (error: Error, data: any) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+
+    resolve(data);
+  });
+});
+```
+
+- `readFile-test.ts`
+
+```ts
+import { readFile } from '../fileApi/readFile';
+
+const readTest = async (filename: string) => {
+  const result = await readFile(filename);
+  console.log(`read ${result} from ${filename} file.`);
+};
+
+readTest('./data/hello.txt')
+  .then(() => readTest('./data/test.json'))
+  .catch((e: Error) => console.log(e.message));
+```
+
+#### 🎈 fs.appendFile API로 파일에 내용 추가하기
+
+```ts
+import * as fs from 'fs';
+
+export const appendFile = (
+  filename: string, data: any,
+): Promise<any> => new Promise((resolve, reject) => {
+  fs.appendFile(filename, data, 'utf8', (error: Error) => {
+    if (error) {
+      reject(error);
+      return;
+    }
+
+    resolve(data);
+  });
+});
+```
+
+- `appendFile-test.ts`
+
+```ts
+import { appendFile } from '../fileApi/appendFile';
+import { mkdir } from '../fileApi/mkdir';
+
+const appendTest = async (filename: string, data: any) => {
+  const result = await appendFile(filename, data);
+  console.log(`append ${result} to ${filename}`);
+};
+
+mkdir('./data')
+  .then(() => appendTest('./data/hello.txt', 'Hi there!'))
+  .catch((e: Error) => console.log(e.message));
+```
+
+#### 🎈 fs.unlink API로 파일 삭제하기
+
+```ts
+import * as fs from 'fs';
+
+import { fileExists } from './fileExists';
+
+export const deleteFile = (
+  filename: string,
+): Promise<string> => new Promise<any>(async (resolve, reject) => {
+  const alreadyExists = await fileExists(filename);
+
+  if (!alreadyExists) {
+    resolve(filename);
+    return;
+  }
+
+  fs.unlink(filename, (error) => (error ? reject(error) : resolve(filename)));
+});
+```
+
+- `deleteFile-test.ts`
+
+```ts
+import { deleteFile } from '../fileApi/deleteFile';
+import { rmdir } from '../fileApi/rmdir';
+
+const deleteTest = async (filename: string) => {
+  const result = await deleteFile(filename);
+  console.log(`delete ${result} file.`);
+};
+
+Promise.all([deleteTest('./data/hello.txt'), deleteTest('./data/test.json')])
+  .then(() => rmdir('./data'))
+  .then((dirname) => console.log(`delete ${dirname} dir`))
+  .catch((e: Error) => console.log(e.message));
+```
+
+#### 🎈 src/fileApi/index.ts 파일 만들기
+
+```ts
+import { fileExists } from './fileExists';
+import { mkdir } from './mkdir';
+import { rmdir } from './rmdir';
+import { writeFile } from './writeFile';
+import { readFile } from './readFile';
+import { appendFile } from './appendFile';
+import { deleteFile } from './deleteFile';
+
+export {
+  fileExists, mkdir, rmdir, writeFile, readFile, appendFile, deleteFile,
+};
+```
+
+### 📚 그럴듯한 가짜 데이터 만들기
+
+```ts
+export interface IFake {
+  name: string;
+  email: string;
+  sentence: string;
+  profession: string;
+  birthday: Date;
+}
+```
+
+- `makeFakeData.ts`
+
+```ts
+import { Chance } from 'chance';
+
+import { IFake } from './IFake';
+
+const c = new Chance();
+
+export const makeFakeData = (): IFake => ({
+  name: c.name(),
+  email: c.email(),
+  profession: c.profession(),
+  birthday: c.birthday(),
+  sentence: c.sentence(),
+});
+
+export { IFake };
+```
+
+- `makeFakeData-test.ts`
+
+```ts
+import { makeFakeData, IFake } from '../fake/makeFakeData';
+
+const fakeData: IFake = makeFakeData();
+
+console.log(fakeData);
+```
+
+### 📚 Object.keys와 Object.values 함수 사용하기
+
+```ts
+import { IFake, makeFakeData } from '../fake/makeFakeData';
+
+const data: IFake = makeFakeData();
+const keys = Object.keys(data);
+
+console.log('keys: ', keys);
+
+const values = Object.values(data);
+
+console.log('values: ', values);
+```
+
+### 📚 CSV 파일 만들기
+- 가짜 데이터를 여러 개 생성
+
+```ts
+export function* range(max: number, min: number = 0) {
+  while (min < max) {
+    yield min++;
+  }
+}
+```
+
+- `makeFakeData`를 사용해 `numberOfItems`만큼 `IFake` 객체를 생성한다. 그리고 속성명과 속성값의 배열을 각각 추출해 `filename` 파일을 만든다.
+
+
+```ts
+import * as path from 'path';
+
+import { mkdir } from '../fileApi/mkdir';
+import { range } from '../utils/range';
+import { IFake } from './IFake';
+import { makeFakeData } from './makeFakeData';
+import { writeFile } from '../fileApi/writeFile';
+import { appendFile } from '../fileApi/appendFile';
+
+export const writeCsvFormatFakeData = async (
+  filename: string, numberOfItems: number,
+) : Promise<string> => {
+  const dirname = path.dirname(filename);
+  await mkdir(dirname);
+
+  const comma = ',';
+  const newLine = '\n';
+
+  for (const n of range(numberOfItems)) {
+    const fake: IFake = makeFakeData();
+
+    if (n === 0) {
+      const keys = Object.keys(fake).join(comma);
+      await writeFile(filename, keys);
+    }
+
+    const values = Object.values(fake).join(comma);
+    await appendFile(filename, newLine + values);
+  }
+
+  return `write ${numberOfItems} items to ${filename} file`;
+};
+```
+
+
+### 📚 데이터를 CSV 파일에 쓰기
+- CSV 파일 포맷으로 `IFake` 타입 객체를 저장하는 파일을 만들고 다음과 같이 코드를 작성한다.
+
+```ts
+import { getFileNameAndNumber } from './utils/getFileNameAndNumber';
+import { writeCsvFormatFakeData } from './fake/writeCsvFormatFakeData';
+
+const [filename, numberOfFakeData] = getFileNameAndNumber('./data/fake', 1);
+const csvFilename = `${filename}-${numberOfFakeData}.csv`;
+
+writeCsvFormatFakeData(csvFilename, numberOfFakeData)
+  .then((result) => console.log(result))
+  .catch((e: Error) => console.log(e.message));
+```
+
+### 📚 zip 함수 만들기
+- CSV 포맷 파일을 읽는 코드를 작성
+- 객체의 속성명 배열과 속성값 배열을 결합해 객체를 만드는 함수가 필요한데 이러한 기능을 하는 함수는 보통 `zip`라는 이름으로 구현한다.
+
+```ts
+export const zip = (keys: string[], values: any[]) => {
+  const makeObject = (key: string, value: any) => ({ [key]: value });
+  const mergeObject = (a: any[]) => a.reduce((sum, val) => ({ ...sum, ...val }), {});
+
+  const tmp = keys
+    .map((key, index) => [key, values[index]])
+    .filter((a) => a[0] && a[1])
+    .map((a) => makeObject(a[0], a[1]));
+
+  return mergeObject(tmp);
+};
+```
+
+- `zip-test.ts`
+
+```ts
+import { zip } from '../utils';
+import { makeFakeData, IFake } from '../fake';
+
+const data = makeFakeData();
+const keys = Object.keys(data);
+const values = Object.values(data);
+
+const fake: IFake = zip(keys, values) as IFake;
+
+console.log(fake);
+```
+
+### 📚 CSV 파일 데이터 읽기
+- 다음 코드는 1,024Byte의 Buffer 타입 객체를 생성해 파일을 1,024Byte씩 읽으면서 한 줄씩 찾은 뒤, 찾은 줄(즉, `\n`으로 끝난 줄)의 데이터를 `yield`문으로 발생시키는 예이다.
+
+```ts
+import * as fs from 'fs';
+
+function readLine(fd: any, buffer: Buffer, bufferSize: number, position: number): [string, number] {
+  let line = '';
+  let readSize;
+  const crSize = '\n'.length;
+
+  while (true) {
+    readSize = fs.readSync(fd, buffer, 0, bufferSize, position);
+
+    if (readSize > 0) {
+      const temp = buffer.toString('utf8', 0, readSize);
+      const index = temp.indexOf('\n');
+
+      if (index > -1) {
+        line += temp.substr(0, index);
+        position += index + crSize;
+        break;
+      } else {
+        line += temp;
+        position += temp.length;
+      }
+    } else {
+      position = -1; // end of file
+      break;
+    }
+  }
+
+  return [line.trim(), position];
+}
+
+export function* readFileGenerator(filename: string): any {
+  let fd: any;
+
+  try {
+    fd = fs.openSync(filename, 'rs');
+
+    const stats = fs.fstatSync(fd);
+    const bufferSize = Math.min(stats.size, 1024);
+    const buffer = Buffer.alloc(bufferSize + 4);
+    let filepos = 0;
+    let line;
+
+    while (filepos > -1) {
+      [line, filepos] = readLine(fd, buffer, bufferSize, filepos);
+
+      if (filepos > -1) {
+        yield line;
+      }
+    }
+
+    yield buffer.toString(); // 마지막 줄
+  } catch (error) {
+    console.log('readLine: ', error.message);
+  } finally {
+    fd && fs.closeSync(fd);
+  }
+}
+```
+
+- `readFileGenerator-test.ts`
+- `readFileGenerator`는 단순히 한 줄 한 줄 읽는다.
+
+```ts
+import { readFileGenerator } from '../fileApi';
+
+for (const value of readFileGenerator('data/fake-10000.csv')) {
+  console.log('<line>', value, '</line>');
+  break;
+}
+
+// <line> name,email,profession,birthday,sentence </line>
+```
+
+- CSV 파일을 해석하면서 읽는 코드이다.
+
+```ts
+import { readFileGenerator } from '../fileApi';
+import { zip } from '../utils';
+
+export function* csvFileReaderGenerator(filename: string, delim: string = ',') {
+  let header = [];
+
+  for (const line of readFileGenerator(filename)) {
+    if (!header.length) {
+      header = line.split(delim);
+    } else {
+      yield zip(header, line.split(delim));
+    }
+  }
+}
+```
+
+- `readCsv.ts`
+
+```ts
+import { getFileNameAndNumber } from './utils';
+import { csvFileReaderGenerator } from './csv/csvFileReaderGenerator';
+
+const [filename] = getFileNameAndNumber('./data/fake-10000.csv', 1);
+
+let line = 1;
+
+for (const object of csvFileReaderGenerator(filename)) {
+  console.log(`[${line++}] ${JSON.stringify(object)}`);
+}
+
+console.log('\n read complete.');
+```
