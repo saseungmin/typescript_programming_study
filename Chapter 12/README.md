@@ -778,3 +778,188 @@ export const runServer = (mongodb) => {
     .listen(port, () => console.log(`http://localhost:${port} started...`));
 };
 ```
+
+## 🦄 리액트와 부트스트랩으로 프런트엔드 웹 만들기
+
+- `./frontend` 폴더 참고
+
+### 📚 App.tsx 파일 수정
+
+```tsx
+import React from 'react';
+
+const App: React.FC = () => {
+  const user = {
+    name: 'Jack',
+    age: 32,
+  }
+
+  return (
+    <div className="App">{
+      JSON.stringify(user)
+    }</div>
+  )
+}
+
+export default App;
+```
+
+### 📚 API 서버에서 실제 데이터 가져오기
+
+```ts
+export interface IUser {
+  _id: string;
+  name: string;
+  email: string;
+  sentence: string;
+  profession: string;
+  birthday: string;
+}
+```
+
+- `getDataPromise.ts`
+
+```ts
+import { IUser } from './IUser';
+
+type GetDataPromiseCallback = (a: IUser[]) => void;
+
+export const getDataPromise =  (fn: GetDataPromiseCallback) => (
+  skip: number,
+  limit: number,
+) => fetch(`http://localhost:4000/users/${skip}/${limit}`)
+      .then((res) => res.json())
+      .then(fn);
+```
+
+- `App.tsx`
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+import { getDataPromise } from './getDataPromise';
+import { IUser } from './IUser';
+
+const App: React.FC = () => {
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  useEffect(() => {
+    getDataPromise((receivedUsers: IUser[]) => {
+      setUsers([...users, ...receivedUsers]);
+    })(0, 1);
+  }, []);
+
+  return (
+    <div className="App">{JSON.stringify(users)}</div>
+  )
+}
+
+export default App;
+```
+
+### 📚 서버에서 데이터 계속 가져오기
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+import { getDataPromise } from './getDataPromise';
+import { IUser } from './IUser';
+
+const App: React.FC = () => {
+  const [skip, setSkip] = useState(0);
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  const limit = 1;
+  const onClick = () => {
+    getDataPromise((receivedUsers: IUser[]) => {
+      setSkip(skip + limit);
+      setUsers([...users, ...receivedUsers]);
+    })(skip, limit);
+  }
+  useEffect(onClick, []);
+
+  return (
+    <div className="App">
+      <p>
+        <button onClick={onClick}>more data...</button>
+      </p>
+      <p>{JSON.stringify(users)}</p>
+    </div>
+  )
+}
+
+export default App;
+```
+
+### 📚 부트스트랩 CSS 프레임워크 사용하기
+
+- https://www.bootstrapcdn.com/
+- CSS와 JavaScript Bundle public/index.html에 추가
+
+### 📚 카드 컴포넌트 만들기
+- `Card.tsx`
+
+```tsx
+import React from 'react';
+
+import { IUser } from './IUser';
+
+const random = (max: number) => Math.floor(Math.random() * max);
+
+const Card: React.FC<{ user: IUser, click: () => void }> = ({user, click}) => {
+  const { name, email, sentence, profession, birthday } = user;
+  const b = new Date(birthday);
+  const src = `https://source.unsplash.com/random/1000x${random(300) + 500}`;
+
+  return (
+    <div className="card">
+      <img src={src} className="card-img-top" />
+      <div className="card-body">
+        <h5 className="card-title">{name}({email})</h5>
+        <h6 className="card-subtitle mb-2 text-muted">
+          {profession} birthday: {b.getFullYear()}
+        </h6>
+        <p className="card-text">{sentence}</p>
+        <a href="#" className="btn btn-primary" onClick={click}>more data...</a>
+      </div>
+    </div>
+  );
+};
+
+export default Card;
+```
+
+- App.tsx
+
+```tsx
+import React, { useState, useEffect } from 'react';
+
+import { getDataPromise } from './getDataPromise';
+import { IUser } from './IUser';
+
+import Card from './Card';
+
+const App: React.FC = () => {
+  const [skip, setSkip] = useState(0);
+  const [users, setUsers] = useState<IUser[]>([]);
+
+  const limit = 1;
+  const onClick = () => {
+    getDataPromise((receivedUsers: IUser[]) => {
+      setSkip(skip + limit);
+      setUsers([...users, ...receivedUsers]);
+    })(skip, limit);
+  }
+  useEffect(onClick, []);
+
+  return (
+    <div className="App">
+      {users.map((user: IUser, key: number) => (
+        <Card click={onClick} user={user} key={key.toString()} />
+      ))}
+    </div>
+  )
+}
+
+export default App;
+```
