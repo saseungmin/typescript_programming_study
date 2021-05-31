@@ -4,7 +4,7 @@
   "description": "Chapter 12: 타입스크립트 함수형 프로그래밍 실습",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/test/readFileGenerator-test.ts",
+    "dev": "ts-node src/test/find-limit-skip.ts",
     "build": "tsc && node dist"
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "devDependencies": {
     "@types/chance": "^1.1.2",
     "@types/mkdirp": "^1.0.1",
+    "@types/mongodb": "^3.6.17",
     "@types/node": "^15.6.1",
     "@types/rimraf": "^3.0.0",
     "@typescript-eslint/eslint-plugin": "^4.25.0",
@@ -26,6 +27,7 @@
   "dependencies": {
     "chance": "^1.1.7",
     "mkdirp": "^1.0.4",
+    "mongodb": "^3.6.9",
     "rimraf": "^3.0.2"
   }
 }

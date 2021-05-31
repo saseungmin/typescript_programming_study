@@ -515,3 +515,170 @@ for (const object of csvFileReaderGenerator(filename)) {
 
 console.log('\n read complete.');
 ```
+
+## 🦄 몽고DB에 데이터 저장하기
+
+### 📚 몽고DB에 접속하기
+- mongodb 패키지가 제공하는 MongoClient 객체의 `connect` 함수를 사용하여 몽고DB에 접속
+
+```ts
+import { MongoClient } from 'mongodb';
+
+export const connect = (mongoUrl: string = 'mongodb://localhost:27017') => MongoClient.connect(mongoUrl, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+```
+
+- 정상 연결
+
+```ts
+import { connect } from '../mongodb/connect';
+
+const connectTest = async () => {
+  let connection;
+
+  try {
+    connection = await connect();
+    console.log('connection OK.', connection);
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    connection.close();
+  }
+};
+
+connectTest();
+```
+
+### 📚 데이터베이스 연결
+
+```ts
+const db = await connection.db('ch12-2');
+```
+
+### 📚 컬렉션을 생성
+
+```ts
+const personsCollection = db.collection('persons');
+const addressesCollection = db.collection('addresses');
+```
+
+### 📚 문서를 컬렉션에 저장하기
+
+```ts
+const personsCollection = db.collection('persons');
+const person = { name: 'Jack', age: 32 };
+
+let result = await personsCollection.insertOne(person);
+```
+
+### 📚 문서 찾기, 문서 삭제하기, 검색 결과 정렬
+1. 문서 찾기
+
+```ts
+// name 속성값이 Jack인 문서 찾기
+const cursor = personsCollection.find({ name: 'Jack' });
+// 전체
+const cursor = personsCollection.find({});
+```
+
+2. 조건에 맞는 문서 하나만 찾기
+
+```ts
+const result = await personsCollection.findOne({ _id });
+```
+
+3. 문서 삭제하기
+
+```ts
+let result = await personsCollection.deleteOne({ name: 'Tom' });
+result = await personsCollection.deleteMany({});
+```
+
+4. 검색 결과 정렬하기
+
+```ts
+const cursor = personsCollection.find({ name: 'Jack' }).sort({ age: -1 });
+```
+
+- 컬렉션에 문서 개수가 많아지면 검색 시간이 느려지는데, 이를 방지하기 위해 컬렉션에 인덱스를 만들게 된다.
+
+```ts
+// 1: 오름차순, -1: 내림차순
+await personsCollection.createIndex({ name: 1, age: -1 });
+```
+
+### 📚 CSV 파일 몽고DB에 저장하기
+
+- 다음 코드는 CSV 파일을 읽어서 `users`라는 컬렉션에 데이터를 담고, `birthday`와 `name` 속성에 인덱스를 생성하는 내용을 구현한 예이다.
+
+```ts
+import { connect } from './mongodb/connect';
+import { csvFileReaderGenerator } from './csv/csvFileReaderGenerator';
+import { getFileNameAndNumber } from './utils';
+
+const insertCsvToMongo = async (csvFilename, collectionName, index) => {
+  let connection;
+
+  try {
+    connection = await connect();
+    const db = await connection.db('ch12-2');
+    const collection = db.collection(collectionName);
+    await collection.deleteMany({});
+    await collection.createIndex(index);
+
+    let line = 1;
+
+    for (const object of csvFileReaderGenerator(csvFilename)) {
+      await collection.insertOne(object);
+      console.log(`${line++} inserted.`);
+    }
+
+    console.log('\n insertion complete.');
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    connection.close();
+  }
+};
+
+const [filename] = getFileNameAndNumber('./data/fake-1000.csv', 1);
+insertCsvToMongo(filename, 'users', { birthday: -1, name: 1 });
+```
+
+### 📚 limit와 skip 메서드
+- `users` 컬렉션의 데이터 중에서 다섯 건을 얻어와 `name`과 `birthday` 속성값만 화면에 출력하는 내용이다.
+
+```ts
+import { connect } from './mongodb/connect';
+import { IFake } from './fake/IFake';
+
+const findLimitSkip = async () => {
+  let connection;
+
+  try {
+    connection = await connect();
+    const db = await connection.db('ch12-2');
+    const usersCollection = db.collection('users');
+
+    const cursor = await usersCollection.find({})
+      .sort({ birthday: -1, name: 1 })
+      .skip(100)
+      .limit(5);
+
+    const result = await cursor.toArray();
+
+    console.log(result.map((user: IFake) => ({
+      name: user.name,
+      birthday: user.birthday,
+    })));
+  } catch (error) {
+    console.log(error.message);
+  } finally {
+    connection.close();
+  }
+};
+
+findLimitSkip();
+```
