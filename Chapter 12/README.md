@@ -682,3 +682,99 @@ const findLimitSkip = async () => {
 
 findLimitSkip();
 ```
+
+## 🦄 익스프레스로 API 서버 만들기
+
+### 📚 익스프레스 프레임워크
+- 익스페이스 프레임워크를 사용하면 다음 코드처럼 웹 서버를 쉽게 만들 수 있다.
+
+```ts
+import express from 'express';
+
+const app = express();
+const port = 4000;
+
+app
+  .get('/', (req, res) => res.json({ message: 'Hello world!' }))
+  .listen(port, () => console.log(`http://localhost:${port} started...`));
+```
+
+### 📚 라우팅 기능 구현
+
+```ts
+import express from 'express';
+
+const app = express();
+const port = 4000;
+
+app
+  .get('/', (req, res) => res.json({ message: 'Hello world!' }))
+  .get('/users/:skip/:limit', (req, res) => {
+    const { skip, limit } = req.params;
+
+    res.json({ skip, limit });
+  })
+  .listen(port, () => console.log(`http://localhost:${port} started...`));
+```
+
+### 📚 익스프레스 미들웨어 추가
+- REST 방식의 API 서버들은 웹 페이지의 본문 내용을 분석하려고 할 때 `bodyParser`와 `cors`라는 패키지를 `use` 메서드를 사용해 다음처럼 작성해야 한다.
+
+```ts
+import bodyParser from 'body-parser';
+import cors from 'cors';
+
+app
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(cors())
+```
+
+### 📚 몽고DB 연결
+
+- 몽고DB 서버에 접속하는 코드
+
+```ts
+import { runServer } from './runServer';
+import { connect } from './mongodb/connect';
+
+connect()
+  .then(async (connection) => {
+    const db = await connection.db('ch12-2');
+    return db;
+  })
+  .then(runServer)
+  .catch((e: Error) => console.log(e.message));
+```
+
+- `runServer.ts`
+
+```ts
+import cors from 'cors';
+import express from 'express';
+import bodyParser from 'body-parser';
+
+export const runServer = (mongodb) => {
+  const app = express();
+  const port = 4000;
+
+  app
+    .use(bodyParser.urlencoded({ extended: true }))
+    .use(cors())
+    .get('/', (req, res) => res.json({ message: 'Hello world!' }))
+    .get('/users/:skip/:limit', async (req, res) => {
+      const { skip, limit } = req.params;
+
+      const usersCollection = await mongodb.collection('users');
+      const cursor = await usersCollection
+        .find({})
+        .sort({ name: 1 })
+        .skip(parseInt(skip, 10))
+        .limit(parseInt(limit, 10));
+
+      const result = await cursor.toArray();
+
+      res.json(result);
+    })
+    .listen(port, () => console.log(`http://localhost:${port} started...`));
+};
+```
